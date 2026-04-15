@@ -1,0 +1,190 @@
+# =============================================================================
+# CI Pipeline for Task Management System
+# =============================================================================
+# This pipeline runs automatically when code is pushed or a pull request is
+# opened against the main branch. It ensures code quality by building,
+# testing, checking coverage, and building a Docker image.
+# =============================================================================
+
+name: CI Pipeline
+
+# ---- TRIGGERS ----
+# "on" defines WHEN this pipeline runs
+on:
+  push:
+    branches: [ main, develop ]       # Runs on every push to main or develop
+  pull_request:
+    branches: [ main ]                # Runs when a PR targets main
+
+# ---- JOBS ----
+# A workflow can have multiple jobs. Each job runs on a fresh virtual machine.
+jobs:
+
+  # ===========================================================================
+  # JOB 1: BUILD & TEST
+  # ===========================================================================
+  build-and-test:
+    name: Build, Test & Coverage
+    runs-on: ubuntu-latest            # Use a fresh Ubuntu Linux VM
+
+    steps:
+      # -----------------------------------------------------------------------
+      # STEP 1: CHECKOUT CODE
+      # -----------------------------------------------------------------------
+      # This downloads your repository code onto the runner VM.
+      # Without this, the runner has an empty filesystem.
+      # "uses" means we're using a pre-built action from GitHub's marketplace.
+      # actions/checkout@v4 is maintained by GitHub themselves.
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      # -----------------------------------------------------------------------
+      # STEP 2: SET UP JAVA 17
+      # -----------------------------------------------------------------------
+      # The runner doesn't have your specific Java version pre-installed.
+      # This action installs Java 17 (Temurin distribution, which is free/open).
+      # It also configures Maven to use this Java version.
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'     # Eclipse Temurin = free, production-ready JDK
+          cache: 'maven'              # Cache downloaded Maven dependencies for speed
+
+      # -----------------------------------------------------------------------
+      # STEP 3: CACHE MAVEN DEPENDENCIES
+      # -----------------------------------------------------------------------
+      # Maven downloads all dependencies (Spring Boot, JPA, etc.) from the
+      # internet every time. Caching saves ~2-5 minutes on subsequent runs.
+      # The cache key includes pom.xml hash — if dependencies change, cache
+      # is invalidated and rebuilt.
+      - name: Cache Maven packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
+      # -----------------------------------------------------------------------
+      # STEP 4: BUILD & RUN TESTS WITH COVERAGE
+      # -----------------------------------------------------------------------
+      # "mvn verify" does everything in order:
+      #   compile → test → package → verify
+      # JaCoCo (configured in pom.xml) automatically:
+      #   1. Instruments code before tests
+      #   2. Collects coverage data during tests
+      #   3. Generates report after tests
+      #   4. Fails if coverage < 75% (in the "verify" phase)
+      #
+      # -B = batch mode (no interactive prompts, cleaner logs)
+      # -Dspring.profiles.active=test ensures test config is used
+      - name: Build and run tests with coverage
+        run: mvn verify -B -Dspring.profiles.active=test
+
+      # -----------------------------------------------------------------------
+      # STEP 5: UPLOAD COVERAGE REPORT AS ARTIFACT
+      # -----------------------------------------------------------------------
+      # Even if the build fails, we want to see the coverage report.
+      # This uploads the JaCoCo HTML report so you can download and view it
+      # from the GitHub Actions UI.
+      # "if: always()" means this step runs even if previous steps failed.
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: target/site/jacoco/   # JaCoCo generates reports here
+          retention-days: 30          # Keep the artifact for 30 days
+
+      # -----------------------------------------------------------------------
+      # STEP 6: UPLOAD TEST RESULTS
+      # -----------------------------------------------------------------------
+      # Surefire generates XML test result files. Uploading them lets you
+      # see exactly which tests passed/failed in the GitHub Actions UI.
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: target/surefire-reports/
+          retention-days: 30
+
+      # -----------------------------------------------------------------------
+      # STEP 7: BUILD JAR ARTIFACT
+      # -----------------------------------------------------------------------
+      # Package the application as a JAR file (already done by "mvn verify",
+      # but we want to upload it as a downloadable artifact).
+      - name: Upload build artifact (JAR)
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-jar
+          path: target/*.jar
+          retention-days: 30
+
+  # ===========================================================================
+  # JOB 2: BUILD DOCKER IMAGE
+  # ===========================================================================
+  # This job runs AFTER build-and-test succeeds (defined by "needs").
+  # If tests fail, this job is skipped — no point building a broken image.
+  docker-build:
+    name: Build Docker Image
+    runs-on: ubuntu-latest
+    needs: build-and-test              # Wait for Job 1 to pass
+    if: github.event_name == 'push'    # Only build image on push, not on PR
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      # Build the JAR first (Docker needs it)
+      - name: Build application JAR
+        run: mvn package -B -DskipTests
+
+      # -----------------------------------------------------------------------
+      # GENERATE VERSION TAG
+      # -----------------------------------------------------------------------
+      # We tag each Docker image with a unique version so we can:
+      #   1. Know exactly which commit produced which image
+      #   2. Roll back to a previous version if needed
+      # Format: v1.0.0-<short-commit-hash>  (e.g., v1.0.0-a1b2c3d)
+      - name: Generate version tag
+        id: version
+        run: |
+          SHORT_SHA=$(echo ${{ github.sha }} | cut -c1-7)
+          VERSION="1.0.0-${SHORT_SHA}"
+          echo "VERSION=${VERSION}" >> $GITHUB_OUTPUT
+          echo "Docker image will be tagged as: ${VERSION}"
+
+      # -----------------------------------------------------------------------
+      # BUILD DOCKER IMAGE
+      # -----------------------------------------------------------------------
+      # This uses the Dockerfile in the repo root to build the image.
+      # We tag it with both the version and "latest".
+      # -t = tag the image with a name
+      # -f = path to Dockerfile
+      - name: Build Docker image
+        run: |
+          docker build \
+            -t taskmanagement:${{ steps.version.outputs.VERSION }} \
+            -t taskmanagement:latest \
+            -f Dockerfile .
+
+      # -----------------------------------------------------------------------
+      # VERIFY DOCKER IMAGE
+      # -----------------------------------------------------------------------
+      # Sanity check: make sure the image was actually built and is reasonable.
+      - name: Verify Docker image
+        run: |
+          echo "=== Built Docker Images ==="
+          docker images taskmanagement
+          echo ""
+          echo "=== Image Size ==="
+          docker images taskmanagement --format "{{.Repository}}:{{.Tag}} - {{.Size}}"

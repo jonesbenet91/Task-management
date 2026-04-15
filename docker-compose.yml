@@ -1,0 +1,103 @@
+# =============================================================================
+# Docker Compose — Task Management System
+# =============================================================================
+# This file defines how to run the ENTIRE application stack with one command:
+#   docker compose up
+#
+# It creates TWO containers:
+#   1. postgres  → the database
+#   2. app       → your Spring Boot application
+#
+# They communicate over a private Docker network (app-network).
+# =============================================================================
+
+services:
+
+  # ---------------------------------------------------------------------------
+  # SERVICE 1: PostgreSQL Database
+  # ---------------------------------------------------------------------------
+  postgres:
+    image: postgres:16-alpine          # Official PostgreSQL image (Alpine = small)
+    container_name: taskmanagement-db
+    restart: unless-stopped            # Auto-restart unless you manually stop it
+
+    # Environment variables configure the database
+    environment:
+      POSTGRES_DB: ${DB_NAME:-taskmanagement}       # Creates this database on startup
+      POSTGRES_USER: ${DB_USERNAME:-postgres}        # Database username
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD must be set}  # REQUIRED — no default
+
+    # Persist database data even if container is destroyed
+    # Without this, all data is LOST when the container is removed!
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+    # Expose PostgreSQL port to host (for local debugging tools like pgAdmin)
+    ports:
+      - "5432:5432"
+
+    # Health check: verify the database is ready to accept connections
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME:-postgres} -d ${DB_NAME:-taskmanagement}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+    networks:
+      - app-network
+
+  # ---------------------------------------------------------------------------
+  # SERVICE 2: Task Management Application
+  # ---------------------------------------------------------------------------
+  app:
+    build:
+      context: .                       # Build from current directory
+      dockerfile: Dockerfile           # Using our multi-stage Dockerfile
+    container_name: taskmanagement-app
+    restart: unless-stopped
+
+    # Wait for PostgreSQL to be HEALTHY before starting the app.
+    # "depends_on" alone only waits for the container to start, not for the
+    # database to be ready. "condition: service_healthy" uses the health check.
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+    # Pass configuration as environment variables
+    # These OVERRIDE the defaults in application.properties
+    environment:
+      SERVER_PORT: 8082
+      DB_URL: jdbc:postgresql://postgres:5432/${DB_NAME:-taskmanagement}  # "postgres" = container name (Docker DNS)
+      DB_USERNAME: ${DB_USERNAME:-postgres}
+      DB_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD must be set}
+      JPA_DDL_AUTO: update
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET must be set}
+      JWT_EXPIRATION: ${JWT_EXPIRATION:-86400000}
+      SPRING_PROFILES_ACTIVE: prod
+
+    # Map container port to host port
+    # Format: HOST_PORT:CONTAINER_PORT
+    ports:
+      - "8082:8082"
+
+    networks:
+      - app-network
+
+# =============================================================================
+# VOLUMES
+# =============================================================================
+# Named volumes persist data across container restarts/rebuilds.
+# Data is stored in Docker's managed storage, not in your project folder.
+volumes:
+  postgres-data:
+    driver: local
+
+# =============================================================================
+# NETWORKS
+# =============================================================================
+# A custom bridge network allows containers to find each other by name.
+# The app connects to "postgres:5432" — Docker resolves "postgres" to
+# the postgres container's IP automatically.
+networks:
+  app-network:
+    driver: bridge

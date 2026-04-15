@@ -1,0 +1,43 @@
+# =============================================================================
+# .dockerignore — Files to exclude from Docker build context
+# =============================================================================
+# When you run "docker build .", Docker sends ALL files in the current
+# directory to the Docker daemon. This file tells Docker what to SKIP.
+#
+# WHY THIS MATTERS:
+# - Smaller build context = faster builds
+# - Prevents secrets (.env files) from leaking into the image
+# - Prevents build artifacts from the host from conflicting with container build
+# =============================================================================
+
+# Build output (we rebuild inside Docker)
+target/
+
+# IDE files (not needed in container)
+.idea/
+.vscode/
+*.iml
+
+# Git directory (not needed in container)
+.git/
+.gitignore
+
+# CI/CD configs (not needed in container)
+.github/
+
+# Documentation & Postman (not needed in container)
+*.md
+postman/
+
+# Environment files (NEVER include secrets in images!)
+.env
+*.env.local
+*.env.production
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Docker files themselves (avoid recursion)
+Dockerfile
+docker-compose*.yml

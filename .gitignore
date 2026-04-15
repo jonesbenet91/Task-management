@@ -1,0 +1,35 @@
+# =============================================================================
+# .gitignore for Task Management System
+# =============================================================================
+
+# --- Build output ---
+target/
+*.jar
+*.war
+*.class
+
+# --- IDE files ---
+.idea/
+*.iml
+.vscode/
+.settings/
+.project
+.classpath
+*.swp
+*.swo
+
+# --- OS files ---
+.DS_Store
+Thumbs.db
+
+# --- Maven ---
+.mvn/wrapper/maven-wrapper.jar
+
+# --- Logs ---
+*.log
+logs/
+
+# --- Environment / Secrets ---
+.env
+*.env.local
+src/main/resources/application-local.properties
