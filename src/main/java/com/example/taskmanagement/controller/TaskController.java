@@ -76,19 +76,26 @@ public class TaskController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @Operation(summary = "Get all tasks", description = "Returns paginated and filtered tasks for the authenticated user")
+    @Operation(summary = "Get all tasks",
+            description = "Returns paginated and filtered tasks for the authenticated user")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Tasks retrieved successfully"),
             @ApiResponse(responseCode = "401", description = "Unauthorized")
     })
     @GetMapping
     public ResponseEntity<Page<TaskResponse>> getTasks(
-            @Parameter(description = "Page number (0-indexed)") @RequestParam(defaultValue = "0") int page,
-            @Parameter(description = "Page size") @RequestParam(defaultValue = "5") int size,
-            @Parameter(description = "Sort field") @RequestParam(defaultValue = "dueDate") String sortBy,
-            @Parameter(description = "Sort direction (asc/desc)") @RequestParam(defaultValue = "asc") String direction,
-            @Parameter(description = "Filter by completed status") @RequestParam(required = false) Boolean completed,
-            @Parameter(description = "Search by title (case-insensitive)") @RequestParam(required = false) String title) {
+            @Parameter(description = "Page number (0-indexed)")
+            @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Page size")
+            @RequestParam(defaultValue = "5") int size,
+            @Parameter(description = "Sort field")
+            @RequestParam(defaultValue = "dueDate") String sortBy,
+            @Parameter(description = "Sort direction (asc/desc)")
+            @RequestParam(defaultValue = "asc") String direction,
+            @Parameter(description = "Filter by completed status")
+            @RequestParam(required = false) Boolean completed,
+            @Parameter(description = "Search by title (case-insensitive)")
+            @RequestParam(required = false) String title) {
 
         Sort sort = direction.equalsIgnoreCase("asc")
                 ? Sort.by(sortBy).ascending()
@@ -99,7 +106,8 @@ public class TaskController {
         return ResponseEntity.ok(tasks);
     }
 
-    @Operation(summary = "Get all tasks for a specific user", description = "Returns paginated and filtered tasks for the given user ID")
+    @Operation(summary = "Get all tasks for a specific user",
+            description = "Returns paginated and filtered tasks for the given user ID")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Tasks retrieved successfully"),
             @ApiResponse(responseCode = "401", description = "Unauthorized")
@@ -107,12 +115,18 @@ public class TaskController {
     @GetMapping("/user/{userId}")
     public ResponseEntity<Page<TaskResponse>> getTasksByUserId(
             @Parameter(description = "User ID") @PathVariable Long userId,
-            @Parameter(description = "Page number (0-indexed)") @RequestParam(defaultValue = "0") int page,
-            @Parameter(description = "Page size") @RequestParam(defaultValue = "10") int size,
-            @Parameter(description = "Sort field") @RequestParam(defaultValue = "createdAt") String sortBy,
-            @Parameter(description = "Sort direction (asc/desc)") @RequestParam(defaultValue = "desc") String direction,
-            @Parameter(description = "Filter by completed status") @RequestParam(required = false) Boolean completed,
-            @Parameter(description = "Search by title (case-insensitive)") @RequestParam(required = false) String title) {
+            @Parameter(description = "Page number (0-indexed)")
+            @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Page size")
+            @RequestParam(defaultValue = "10") int size,
+            @Parameter(description = "Sort field")
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @Parameter(description = "Sort direction (asc/desc)")
+            @RequestParam(defaultValue = "desc") String direction,
+            @Parameter(description = "Filter by completed status")
+            @RequestParam(required = false) Boolean completed,
+            @Parameter(description = "Search by title (case-insensitive)")
+            @RequestParam(required = false) String title) {
 
         Sort sort = direction.equalsIgnoreCase("asc")
                 ? Sort.by(sortBy).ascending()

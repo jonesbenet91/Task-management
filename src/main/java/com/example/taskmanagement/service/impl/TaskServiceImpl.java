@@ -46,7 +46,9 @@ public class TaskServiceImpl implements TaskService {
         Page<Task> tasks;
 
         if (completed != null && title != null) {
-            tasks = taskRepository.findByUserIdAndCompletedAndTitleContainingIgnoreCase(userId, completed, title, pageable);
+            tasks = taskRepository
+                    .findByUserIdAndCompletedAndTitleContainingIgnoreCase(
+                            userId, completed, title, pageable);
         } else if (completed != null) {
             tasks = taskRepository.findByUserIdAndCompleted(userId, completed, pageable);
         } else if (title != null) {
