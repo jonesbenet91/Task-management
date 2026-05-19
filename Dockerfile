@@ -6,6 +6,7 @@ WORKDIR /app
 
 
 COPY pom.xml .
+COPY checkstyle.xml .
 COPY mvnw .
 COPY .mvn .mvn
 
