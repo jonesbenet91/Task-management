@@ -1,49 +1,35 @@
-# =============================================================================
-# CI Pipeline for Task Management System
-# =============================================================================
-# This pipeline runs automatically when code is pushed or a pull request is
-# opened against the main branch. It ensures code quality by building,
-# testing, checking coverage, and building a Docker image.
-# =============================================================================
 
-name: CI Pipeline
+name: CI/CD Pipeline
 
-# ---- TRIGGERS ----
-# "on" defines WHEN this pipeline runs
 on:
   push:
-    branches: [ main, develop ]       # Runs on every push to main or develop
+    branches: [ main, develop ]
   pull_request:
-    branches: [ main ]                # Runs when a PR targets main
+    branches: [ main ]
+  workflow_dispatch:
 
-# ---- JOBS ----
-# A workflow can have multiple jobs. Each job runs on a fresh virtual machine.
+permissions:
+  contents: read
+  packages: write
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository_owner }}/taskmanagement
+
+
 jobs:
 
-  # ===========================================================================
-  # JOB 1: BUILD & TEST
-  # ===========================================================================
+
   build-and-test:
     name: Build, Test & Coverage
-    runs-on: ubuntu-latest            # Use a fresh Ubuntu Linux VM
+    runs-on: ubuntu-latest
 
     steps:
-      # -----------------------------------------------------------------------
-      # STEP 1: CHECKOUT CODE
-      # -----------------------------------------------------------------------
-      # This downloads your repository code onto the runner VM.
-      # Without this, the runner has an empty filesystem.
-      # "uses" means we're using a pre-built action from GitHub's marketplace.
-      # actions/checkout@v4 is maintained by GitHub themselves.
+
       - name: Checkout source code
         uses: actions/checkout@v4
 
-      # -----------------------------------------------------------------------
-      # STEP 2: SET UP JAVA 17
-      # -----------------------------------------------------------------------
-      # The runner doesn't have your specific Java version pre-installed.
-      # This action installs Java 17 (Temurin distribution, which is free/open).
-      # It also configures Maven to use this Java version.
+
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
@@ -51,13 +37,7 @@ jobs:
           distribution: 'temurin'     # Eclipse Temurin = free, production-ready JDK
           cache: 'maven'              # Cache downloaded Maven dependencies for speed
 
-      # -----------------------------------------------------------------------
-      # STEP 3: CACHE MAVEN DEPENDENCIES
-      # -----------------------------------------------------------------------
-      # Maven downloads all dependencies (Spring Boot, JPA, etc.) from the
-      # internet every time. Caching saves ~2-5 minutes on subsequent runs.
-      # The cache key includes pom.xml hash — if dependencies change, cache
-      # is invalidated and rebuilt.
+  
       - name: Cache Maven packages
         uses: actions/cache@v4
         with:
@@ -66,29 +46,17 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-
 
-      # -----------------------------------------------------------------------
-      # STEP 4: BUILD & RUN TESTS WITH COVERAGE
-      # -----------------------------------------------------------------------
-      # "mvn verify" does everything in order:
-      #   compile → test → package → verify
-      # JaCoCo (configured in pom.xml) automatically:
-      #   1. Instruments code before tests
-      #   2. Collects coverage data during tests
-      #   3. Generates report after tests
-      #   4. Fails if coverage < 75% (in the "verify" phase)
+     
       #
       # -B = batch mode (no interactive prompts, cleaner logs)
       # -Dspring.profiles.active=test ensures test config is used
       - name: Build and run tests with coverage
         run: mvn verify -B -Dspring.profiles.active=test
 
-      # -----------------------------------------------------------------------
-      # STEP 5: UPLOAD COVERAGE REPORT AS ARTIFACT
-      # -----------------------------------------------------------------------
-      # Even if the build fails, we want to see the coverage report.
-      # This uploads the JaCoCo HTML report so you can download and view it
-      # from the GitHub Actions UI.
-      # "if: always()" means this step runs even if previous steps failed.
+      - name: Run lint check (Checkstyle)
+        run: mvn checkstyle:check -B
+
+
       - name: Upload coverage report
         if: always()
         uses: actions/upload-artifact@v4
@@ -110,11 +78,7 @@ jobs:
           path: target/surefire-reports/
           retention-days: 30
 
-      # -----------------------------------------------------------------------
-      # STEP 7: BUILD JAR ARTIFACT
-      # -----------------------------------------------------------------------
-      # Package the application as a JAR file (already done by "mvn verify",
-      # but we want to upload it as a downloadable artifact).
+
       - name: Upload build artifact (JAR)
         uses: actions/upload-artifact@v4
         with:
@@ -122,16 +86,15 @@ jobs:
           path: target/*.jar
           retention-days: 30
 
-  # ===========================================================================
-  # JOB 2: BUILD DOCKER IMAGE
-  # ===========================================================================
-  # This job runs AFTER build-and-test succeeds (defined by "needs").
-  # If tests fail, this job is skipped — no point building a broken image.
-  docker-build:
-    name: Build Docker Image
+ 
+  docker-package:
+    name: Build and Publish Docker Image
     runs-on: ubuntu-latest
-    needs: build-and-test              # Wait for Job 1 to pass
+    needs: build-and-test              # Must pass before Docker build
     if: github.event_name == 'push'    # Only build image on push, not on PR
+    outputs:
+      version_tag: ${{ steps.version.outputs.VERSION_TAG }}
+      image_ref: ${{ steps.version.outputs.IMAGE_REF }}
 
     steps:
       - name: Checkout source code
@@ -148,43 +111,122 @@ jobs:
       - name: Build application JAR
         run: mvn package -B -DskipTests
 
-      # -----------------------------------------------------------------------
-      # GENERATE VERSION TAG
-      # -----------------------------------------------------------------------
-      # We tag each Docker image with a unique version so we can:
-      #   1. Know exactly which commit produced which image
-      #   2. Roll back to a previous version if needed
-      # Format: v1.0.0-<short-commit-hash>  (e.g., v1.0.0-a1b2c3d)
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+
       - name: Generate version tag
         id: version
         run: |
           SHORT_SHA=$(echo ${{ github.sha }} | cut -c1-7)
-          VERSION="1.0.0-${SHORT_SHA}"
-          echo "VERSION=${VERSION}" >> $GITHUB_OUTPUT
-          echo "Docker image will be tagged as: ${VERSION}"
+          VERSION_TAG="1.0.0-${SHORT_SHA}-build-${{ github.run_number }}"
+          IMAGE_REF="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${VERSION_TAG}"
+          echo "VERSION_TAG=${VERSION_TAG}" >> $GITHUB_OUTPUT
+          echo "IMAGE_REF=${IMAGE_REF}" >> $GITHUB_OUTPUT
+          echo "Docker image will be tagged as: ${VERSION_TAG}"
 
-      # -----------------------------------------------------------------------
-      # BUILD DOCKER IMAGE
-      # -----------------------------------------------------------------------
-      # This uses the Dockerfile in the repo root to build the image.
-      # We tag it with both the version and "latest".
-      # -t = tag the image with a name
-      # -f = path to Dockerfile
+      - name: Preserve previous latest tag for rollback
+        if: github.ref == 'refs/heads/main'
+        run: |
+          PREVIOUS_IMAGE="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:previous"
+          LATEST_IMAGE="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest"
+          if docker pull "${LATEST_IMAGE}"; then
+            docker tag "${LATEST_IMAGE}" "${PREVIOUS_IMAGE}"
+            docker push "${PREVIOUS_IMAGE}"
+            echo "Saved ${LATEST_IMAGE} as ${PREVIOUS_IMAGE} for rollback"
+          else
+            echo "No latest image found yet. Skipping previous tag creation."
+          fi
+
+    
       - name: Build Docker image
         run: |
+          IMAGE_BASE="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}"
           docker build \
-            -t taskmanagement:${{ steps.version.outputs.VERSION }} \
-            -t taskmanagement:latest \
+            -t "${IMAGE_BASE}:${{ steps.version.outputs.VERSION_TAG }}" \
+            -t "${IMAGE_BASE}:${{ github.ref_name }}" \
             -f Dockerfile .
+          if [ "${{ github.ref }}" = "refs/heads/main" ]; then
+            docker tag "${IMAGE_BASE}:${{ steps.version.outputs.VERSION_TAG }}" "${IMAGE_BASE}:latest"
+          fi
 
-      # -----------------------------------------------------------------------
-      # VERIFY DOCKER IMAGE
-      # -----------------------------------------------------------------------
-      # Sanity check: make sure the image was actually built and is reasonable.
+      - name: Push Docker image tags
+        run: |
+          IMAGE_BASE="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}"
+          docker push "${IMAGE_BASE}:${{ steps.version.outputs.VERSION_TAG }}"
+          docker push "${IMAGE_BASE}:${{ github.ref_name }}"
+          if [ "${{ github.ref }}" = "refs/heads/main" ]; then
+            docker push "${IMAGE_BASE}:latest"
+          fi
+
       - name: Verify Docker image
         run: |
           echo "=== Built Docker Images ==="
-          docker images taskmanagement
+          docker images "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}"
           echo ""
           echo "=== Image Size ==="
-          docker images taskmanagement --format "{{.Repository}}:{{.Tag}} - {{.Size}}"
+          docker images "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}" --format "{{.Repository}}:{{.Tag}} - {{.Size}}"
+
+      - name: Save image metadata artifact
+        run: |
+          mkdir -p build-artifacts
+          {
+            echo "image=${{ steps.version.outputs.IMAGE_REF }}"
+            echo "version_tag=${{ steps.version.outputs.VERSION_TAG }}"
+            echo "branch=${{ github.ref_name }}"
+            echo "commit=${{ github.sha }}"
+            echo "run_number=${{ github.run_number }}"
+          } > build-artifacts/image-metadata.txt
+
+      - name: Upload image metadata artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: image-metadata
+          path: build-artifacts/image-metadata.txt
+          retention-days: 30
+
+  deploy-main:
+    name: Deploy Main Image
+    runs-on: ubuntu-latest
+    needs: docker-package
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Deploy container and replace existing instance
+        env:
+          IMAGE_REF: ${{ needs.docker-package.outputs.image_ref }}
+          CONTAINER_NAME: taskmanagement-app
+          HOST_PORT: "8082"
+          CONTAINER_PORT: "8082"
+          SERVER_PORT: "8082"
+          SPRING_PROFILES_ACTIVE: prod
+          DB_URL: jdbc:h2:mem:taskmanagement;DB_CLOSE_DELAY=-1;MODE=PostgreSQL
+          DB_USERNAME: sa
+          DB_PASSWORD: ""
+          JWT_SECRET: ci-cd-deployment-secret-key
+          JWT_EXPIRATION: "86400000"
+        run: |
+          chmod +x scripts/deploy-local.sh
+          ./scripts/deploy-local.sh
+
+      - name: Upload deployment log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: deployment-log
+          path: deployment-logs/*.log
+          retention-days: 30
