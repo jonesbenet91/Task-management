@@ -1,0 +1,796 @@
+{
+  "generated_at": "2026-06-24T12:48:51.736436+00:00",
+  "week": "W26 2026",
+  "domain": {
+    "name": {
+      "name": "Foods D&T",
+      "leadership": {
+        "enterprise_architect": {
+          "name": "Alistair Jacques",
+          "role": "Food & FH&B Enterprise Arch"
+        },
+        "senior_head_of_product": {
+          "name": "Rich Burrows",
+          "role": "SHoP"
+        },
+        "senior_head_of_se": {
+          "name": "Sam Clement",
+          "role": "SHoSE"
+        },
+        "senior_head_of_tpm": {
+          "name": "Claire Attwell",
+          "role": "SHoTPM"
+        },
+        "principal_engineer": {
+          "name": "Tim Mason",
+          "role": "PE"
+        },
+        "head_of_product": {
+          "name": "Zoe Kendrick",
+          "role": "HoP"
+        },
+        "head_of_product_management": {
+          "name": "Vacancy",
+          "role": "HoPM"
+        },
+        "heads_of_tpm": [
+          {
+            "name": "Graeme Boag",
+            "role": "HoTPM"
+          },
+          {
+            "name": "Nico Pansier",
+            "role": "HoTPM"
+          },
+          {
+            "name": "Sian Baker",
+            "role": "HoTPM"
+          }
+        ],
+        "heads_of_engineering": [
+          {
+            "name": "Callum Smith",
+            "role": "HoE"
+          },
+          {
+            "name": "Mark Whittaker",
+            "role": "HoE"
+          }
+        ],
+        "head_of_se": {
+          "name": "Sandhya Radhakrishnan",
+          "role": "HoSE"
+        },
+        "architects": [
+          {
+            "name": "Chandrapandian Mayilvahanan",
+            "role": "Arch"
+          },
+          {
+            "name": "Vivek Biradavolu",
+            "role": "Arch"
+          }
+        ],
+        "engagement_manager": {
+          "name": "Jayachandran Krishnan",
+          "role": "Engagement Manager"
+        },
+        "devops_co_lead": {
+          "name": "Pradeep Pushparajan",
+          "role": "DevOps Co-Lead"
+        }
+      }
+    },
+    "scores": {
+      "Delivery": 42.3,
+      "System Health": 67.9,
+      "Incidents": 45.0,
+      "Code Quality": 47.4,
+      "Estate Hygiene": 62.7,
+      "Ops Readiness": 67.9,
+      "People": 51.9
+    },
+    "overall": 55.0
+  },
+  "subdomains": [
+    {
+      "subdomain_id": "design-buy-make",
+      "subdomain_name": "Design, Buy & Make",
+      "team_count": 9,
+      "scores": {
+        "Delivery": 38.2,
+        "System Health": 70.9,
+        "Incidents": 46.7,
+        "Code Quality": 32.9,
+        "Estate Hygiene": 70.1,
+        "Ops Readiness": 70.9,
+        "People": 50.0
+      },
+      "overall": 54.2
+    },
+    {
+      "subdomain_id": "commercial-planning",
+      "subdomain_name": "Commercial Planning",
+      "team_count": 7,
+      "scores": {
+        "Delivery": 44.1,
+        "System Health": 66.1,
+        "Incidents": 41.4,
+        "Code Quality": 53.5,
+        "Estate Hygiene": 53.4,
+        "Ops Readiness": 66.1,
+        "People": 56.4
+      },
+      "overall": 54.4
+    },
+    {
+      "subdomain_id": "supply-chain-logistics",
+      "subdomain_name": "Supply Chain & Logistics",
+      "team_count": 8,
+      "scores": {
+        "Delivery": 45.5,
+        "System Health": 66.0,
+        "Incidents": 46.2,
+        "Code Quality": 58.4,
+        "Estate Hygiene": 62.4,
+        "Ops Readiness": 66.0,
+        "People": 50.0
+      },
+      "overall": 56.4
+    }
+  ],
+  "teams": [
+    {
+      "team_id": "food-product-data",
+      "team_name": "Food Product Data",
+      "subdomain_id": "design-buy-make",
+      "subdomain_name": "Design, Buy & Make",
+      "scores": {
+        "Delivery": 65.4,
+        "System Health": 100.0,
+        "Incidents": 50.0,
+        "Code Quality": 45.0,
+        "Estate Hygiene": 85.7,
+        "Ops Readiness": 100.0,
+        "People": 50.0
+      },
+      "has_data": {
+        "Delivery": true,
+        "System Health": true,
+        "Incidents": false,
+        "Code Quality": true,
+        "Estate Hygiene": true,
+        "Ops Readiness": true,
+        "People": true
+      },
+      "overall": 74.4
+    },
+    {
+      "team_id": "food-product-packaging-dev",
+      "team_name": "Food Product & Packaging Development",
+      "subdomain_id": "design-buy-make",
+      "subdomain_name": "Design, Buy & Make",
+      "scores": {
+        "Delivery": 23.3,
+        "System Health": 100.0,
+        "Incidents": 50.0,
+        "Code Quality": 0.0,
+        "Estate Hygiene": 33.3,
+        "Ops Readiness": 100.0,
+        "People": 50.0
+      },
+      "has_data": {
+        "Delivery": true,
+        "System Health": true,
+        "Incidents": false,
+        "Code Quality": true,
+        "Estate Hygiene": true,
+        "Ops Readiness": true,
+        "People": true
+      },
+      "overall": 51.1
+    },
+    {
+      "team_id": "food-product-quality-safety",
+      "team_name": "Food Product Quality & Safety",
+      "subdomain_id": "design-buy-make",
+      "subdomain_name": "Design, Buy & Make",
+      "scores": {
+        "Delivery": 23.1,
+        "System Health": 50.0,
+        "Incidents": 50.0,
+        "Code Quality": 50.0,
+        "Estate Hygiene": 50.0,
+        "Ops Readiness": 50.0,
+        "People": 50.0
+      },
+      "has_data": {
+        "Delivery": true,
+        "System Health": false,
+        "Incidents": false,
+        "Code Quality": false,
+        "Estate Hygiene": false,
+        "Ops Readiness": false,
+        "People": true
+      },
+      "overall": 36.5
+    },
+    {
+      "team_id": "food-supplier-commercial-payments",
+      "team_name": "Food Supplier Commercial & Payments",
+      "subdomain_id": "design-buy-make",
+      "subdomain_name": "Design, Buy & Make",
+      "scores": {
+        "Delivery": 50.0,
+        "System Health": 50.0,
+        "Incidents": 50.0,
+        "Code Quality": 63.0,
+        "Estate Hygiene": 100.0,
+        "Ops Readiness": 50.0,
+        "People": 50.0
+      },
+      "has_data": {
+        "Delivery": false,
+        "System Health": false,
+        "Incidents": false,
+        "Code Quality": true,
+        "Estate Hygiene": true,
+        "Ops Readiness": false,
+        "People": true
+      },
+      "overall": 71.0
+    },
+    {
+      "team_id": "food-supplier-management",
+      "team_name": "Food Supplier Management & Experience",
+      "subdomain_id": "design-buy-make",
+      "subdomain_name": "Design, Buy & Make",
+      "scores": {
+        "Delivery": 0.0,
+        "System Health": 50.0,
+        "Incidents": 50.0,
+        "Code Quality": 50.0,
+        "Estate Hygiene": 50.0,
+        "Ops Readiness": 50.0,
+        "People": 50.0
+      },
+      "has_data": {
+        "Delivery": true,
+        "System Health": false,
+        "Incidents": false,
+        "Code Quality": false,
+        "Estate Hygiene": false,
+        "Ops Readiness": false,
+        "People": true
+      },
+      "overall": 25.0
+    },
+    {
+      "team_id": "food-ordering",
+      "team_name": "Food Ordering",
+      "subdomain_id": "design-buy-make",
+      "subdomain_name": "Design, Buy & Make",
+      "scores": {
+        "Delivery": 50.0,
+        "System Health": 87.9,
+        "Incidents": 50.0,
+        "Code Quality": 38.4,
+        "Estate Hygiene": 82.1,
+        "Ops Readiness": 87.9,
+        "People": 50.0
+      },
+      "has_data": {
+        "Delivery": false,
+        "System Health": true,
+        "Incidents": false,
+        "Code Quality": true,
+        "Estate Hygiene": true,
+        "Ops Readiness": true,
+        "People": true
+      },
+      "overall": 69.3
+    },
+    {
+      "team_id": "international-food-ordering",
+      "team_name": "International Food Ordering",
+      "subdomain_id": "design-buy-make",
+      "subdomain_name": "Design, Buy & Make",
+      "scores": {
+        "Delivery": 50.0,
+        "System Health": 50.0,
+        "Incidents": 50.0,
+        "Code Quality": 0.0,
+        "Estate Hygiene": 100.0,
+        "Ops Readiness": 50.0,
+        "People": 50.0
+      },
+      "has_data": {
+        "Delivery": false,
+        "System Health": false,
+        "Incidents": false,
+        "Code Quality": true,
+        "Estate Hygiene": true,
+        "Ops Readiness": false,
+        "People": true
+      },
+      "overall": 50.0
+    },
+    {
+      "team_id": "find-plm",
+      "team_name": "FIND (PLM)",
+      "subdomain_id": "design-buy-make",
+      "subdomain_name": "Design, Buy & Make",
+      "scores": {
+        "Delivery": 65.4,
+        "System Health": 50.0,
+        "Incidents": 50.0,
+        "Code Quality": 50.0,
+        "Estate Hygiene": 50.0,
+        "Ops Readiness": 50.0,
+        "People": 50.0
+      },
+      "has_data": {
+        "Delivery": true,
+        "System Health": false,
+        "Incidents": false,
+        "Code Quality": false,
+        "Estate Hygiene": false,
+        "Ops Readiness": false,
+        "People": true
+      },
+      "overall": 57.7
+    },
+    {
+      "team_id": "digipal-fgap",
+      "team_name": "DigiPal / FGAP",
+      "subdomain_id": "design-buy-make",
+      "subdomain_name": "Design, Buy & Make",
+      "scores": {
+        "Delivery": 17.0,
+        "System Health": 100.0,
+        "Incidents": 20.0,
+        "Code Quality": 0.0,
+        "Estate Hygiene": 80.0,
+        "Ops Readiness": 100.0,
+        "People": 50.0
+      },
+      "has_data": {
+        "Delivery": true,
+        "System Health": true,
+        "Incidents": true,
+        "Code Quality": true,
+        "Estate Hygiene": true,
+        "Ops Readiness": true,
+        "People": true
+      },
+      "overall": 52.4
+    },
+    {
+      "team_id": "price-promotion-execution",
+      "team_name": "Price and Promotion Execution",
+      "subdomain_id": "commercial-planning",
+      "subdomain_name": "Commercial Planning",
+      "scores": {
+        "Delivery": 41.4,
+        "System Health": 50.0,
+        "Incidents": 50.0,
+        "Code Quality": 32.3,
+        "Estate Hygiene": 100.0,
+        "Ops Readiness": 50.0,
+        "People": 95.0
+      },
+      "has_data": {
+        "Delivery": true,
+        "System Health": false,
+        "Incidents": false,
+        "Code Quality": true,
+        "Estate Hygiene": true,
+        "Ops Readiness": false,
+        "People": true
+      },
+      "overall": 67.2
+    },
+    {
+      "team_id": "space-range-display",
+      "team_name": "Space, Range and Display",
+      "subdomain_id": "commercial-planning",
+      "subdomain_name": "Commercial Planning",
+      "scores": {
+        "Delivery": 50.0,
+        "System Health": 87.9,
+        "Incidents": 50.0,
+        "Code Quality": 71.0,
+        "Estate Hygiene": 37.5,
+        "Ops Readiness": 87.9,
+        "People": 50.0
+      },
+      "has_data": {
+        "Delivery": false,
+        "System Health": true,
+        "Incidents": false,
+        "Code Quality": true,
+        "Estate Hygiene": true,
+        "Ops Readiness": true,
+        "People": true
+      },
+      "overall": 66.9
+    },
+    {
+      "team_id": "food-partner-datashare",
+      "team_name": "Food Partner Datashare",
+      "subdomain_id": "commercial-planning",
+      "subdomain_name": "Commercial Planning",
+      "scores": {
+        "Delivery": 50.0,
+        "System Health": 50.0,
+        "Incidents": 50.0,
+        "Code Quality": 50.0,
+        "Estate Hygiene": 50.0,
+        "Ops Readiness": 50.0,
+        "People": 50.0
+      },
+      "has_data": {
+        "Delivery": false,
+        "System Health": false,
+        "Incidents": false,
+        "Code Quality": false,
+        "Estate Hygiene": false,
+        "Ops Readiness": false,
+        "People": true
+      },
+      "overall": 50.0
+    },
+    {
+      "team_id": "optumera",
+      "team_name": "Optumera Squad",
+      "subdomain_id": "commercial-planning",
+      "subdomain_name": "Commercial Planning",
+      "scores": {
+        "Delivery": 50.0,
+        "System Health": 50.0,
+        "Incidents": 50.0,
+        "Code Quality": 50.0,
+        "Estate Hygiene": 50.0,
+        "Ops Readiness": 50.0,
+        "People": 50.0
+      },
+      "has_data": {
+        "Delivery": false,
+        "System Health": false,
+        "Incidents": false,
+        "Code Quality": false,
+        "Estate Hygiene": false,
+        "Ops Readiness": false,
+        "People": true
+      },
+      "overall": 50.0
+    },
+    {
+      "team_id": "forecasting-ordering",
+      "team_name": "Forecasting & Ordering",
+      "subdomain_id": "commercial-planning",
+      "subdomain_name": "Commercial Planning",
+      "scores": {
+        "Delivery": 50.0,
+        "System Health": 87.9,
+        "Incidents": 20.0,
+        "Code Quality": 50.0,
+        "Estate Hygiene": 50.0,
+        "Ops Readiness": 87.9,
+        "People": 50.0
+      },
+      "has_data": {
+        "Delivery": false,
+        "System Health": true,
+        "Incidents": true,
+        "Code Quality": false,
+        "Estate Hygiene": false,
+        "Ops Readiness": true,
+        "People": true
+      },
+      "overall": 61.5
+    },
+    {
+      "team_id": "supply-chain-planning",
+      "team_name": "Supply Chain Planning",
+      "subdomain_id": "commercial-planning",
+      "subdomain_name": "Commercial Planning",
+      "scores": {
+        "Delivery": 17.0,
+        "System Health": 50.0,
+        "Incidents": 50.0,
+        "Code Quality": 50.0,
+        "Estate Hygiene": 50.0,
+        "Ops Readiness": 50.0,
+        "People": 50.0
+      },
+      "has_data": {
+        "Delivery": true,
+        "System Health": false,
+        "Incidents": false,
+        "Code Quality": false,
+        "Estate Hygiene": false,
+        "Ops Readiness": false,
+        "People": true
+      },
+      "overall": 33.5
+    },
+    {
+      "team_id": "stock-allocation",
+      "team_name": "Stock Allocation",
+      "subdomain_id": "commercial-planning",
+      "subdomain_name": "Commercial Planning",
+      "scores": {
+        "Delivery": 50.0,
+        "System Health": 87.1,
+        "Incidents": 20.0,
+        "Code Quality": 71.2,
+        "Estate Hygiene": 36.4,
+        "Ops Readiness": 87.1,
+        "People": 50.0
+      },
+      "has_data": {
+        "Delivery": false,
+        "System Health": true,
+        "Incidents": true,
+        "Code Quality": true,
+        "Estate Hygiene": true,
+        "Ops Readiness": true,
+        "People": true
+      },
+      "overall": 58.6
+    },
+    {
+      "team_id": "food-export-customs",
+      "team_name": "Food Export, Customs & Duty",
+      "subdomain_id": "supply-chain-logistics",
+      "subdomain_name": "Supply Chain & Logistics",
+      "scores": {
+        "Delivery": 50.0,
+        "System Health": 94.0,
+        "Incidents": 50.0,
+        "Code Quality": 63.5,
+        "Estate Hygiene": 80.0,
+        "Ops Readiness": 94.0,
+        "People": 50.0
+      },
+      "has_data": {
+        "Delivery": false,
+        "System Health": true,
+        "Incidents": false,
+        "Code Quality": true,
+        "Estate Hygiene": true,
+        "Ops Readiness": true,
+        "People": true
+      },
+      "overall": 76.3
+    },
+    {
+      "team_id": "food-inventory",
+      "team_name": "Food Inventory",
+      "subdomain_id": "supply-chain-logistics",
+      "subdomain_name": "Supply Chain & Logistics",
+      "scores": {
+        "Delivery": 46.6,
+        "System Health": 84.4,
+        "Incidents": 50.0,
+        "Code Quality": 80.8,
+        "Estate Hygiene": 86.7,
+        "Ops Readiness": 84.4,
+        "People": 50.0
+      },
+      "has_data": {
+        "Delivery": true,
+        "System Health": true,
+        "Incidents": false,
+        "Code Quality": true,
+        "Estate Hygiene": true,
+        "Ops Readiness": true,
+        "People": true
+      },
+      "overall": 72.2
+    },
+    {
+      "team_id": "foal",
+      "team_name": "FOAL",
+      "subdomain_id": "supply-chain-logistics",
+      "subdomain_name": "Supply Chain & Logistics",
+      "scores": {
+        "Delivery": 50.0,
+        "System Health": 50.0,
+        "Incidents": 50.0,
+        "Code Quality": 50.0,
+        "Estate Hygiene": 50.0,
+        "Ops Readiness": 50.0,
+        "People": 50.0
+      },
+      "has_data": {
+        "Delivery": false,
+        "System Health": false,
+        "Incidents": false,
+        "Code Quality": false,
+        "Estate Hygiene": false,
+        "Ops Readiness": false,
+        "People": true
+      },
+      "overall": 50.0
+    },
+    {
+      "team_id": "warehouse-platform",
+      "team_name": "Warehouse Platform",
+      "subdomain_id": "supply-chain-logistics",
+      "subdomain_name": "Supply Chain & Logistics",
+      "scores": {
+        "Delivery": 17.0,
+        "System Health": 100.0,
+        "Incidents": 20.0,
+        "Code Quality": 72.7,
+        "Estate Hygiene": 82.1,
+        "Ops Readiness": 100.0,
+        "People": 50.0
+      },
+      "has_data": {
+        "Delivery": true,
+        "System Health": true,
+        "Incidents": true,
+        "Code Quality": true,
+        "Estate Hygiene": true,
+        "Ops Readiness": true,
+        "People": true
+      },
+      "overall": 63.1
+    },
+    {
+      "team_id": "yard-booking",
+      "team_name": "Yard & Booking Management",
+      "subdomain_id": "supply-chain-logistics",
+      "subdomain_name": "Supply Chain & Logistics",
+      "scores": {
+        "Delivery": 50.0,
+        "System Health": 50.0,
+        "Incidents": 50.0,
+        "Code Quality": 50.0,
+        "Estate Hygiene": 50.0,
+        "Ops Readiness": 50.0,
+        "People": 50.0
+      },
+      "has_data": {
+        "Delivery": false,
+        "System Health": false,
+        "Incidents": false,
+        "Code Quality": false,
+        "Estate Hygiene": false,
+        "Ops Readiness": false,
+        "People": true
+      },
+      "overall": 50.0
+    },
+    {
+      "team_id": "foods-network",
+      "team_name": "Foods Network Team",
+      "subdomain_id": "supply-chain-logistics",
+      "subdomain_name": "Supply Chain & Logistics",
+      "scores": {
+        "Delivery": 50.0,
+        "System Health": 50.0,
+        "Incidents": 50.0,
+        "Code Quality": 50.0,
+        "Estate Hygiene": 50.0,
+        "Ops Readiness": 50.0,
+        "People": 50.0
+      },
+      "has_data": {
+        "Delivery": false,
+        "System Health": false,
+        "Incidents": false,
+        "Code Quality": false,
+        "Estate Hygiene": false,
+        "Ops Readiness": false,
+        "People": true
+      },
+      "overall": 50.0
+    },
+    {
+      "team_id": "foods-platform",
+      "team_name": "Foods Platform Team",
+      "subdomain_id": "supply-chain-logistics",
+      "subdomain_name": "Supply Chain & Logistics",
+      "scores": {
+        "Delivery": 50.0,
+        "System Health": 50.0,
+        "Incidents": 50.0,
+        "Code Quality": 50.0,
+        "Estate Hygiene": 50.0,
+        "Ops Readiness": 50.0,
+        "People": 50.0
+      },
+      "has_data": {
+        "Delivery": false,
+        "System Health": false,
+        "Incidents": false,
+        "Code Quality": false,
+        "Estate Hygiene": false,
+        "Ops Readiness": false,
+        "People": true
+      },
+      "overall": 50.0
+    },
+    {
+      "team_id": "gist",
+      "team_name": "GIST",
+      "subdomain_id": "supply-chain-logistics",
+      "subdomain_name": "Supply Chain & Logistics",
+      "scores": {
+        "Delivery": 50.0,
+        "System Health": 50.0,
+        "Incidents": 50.0,
+        "Code Quality": 50.0,
+        "Estate Hygiene": 50.0,
+        "Ops Readiness": 50.0,
+        "People": 50.0
+      },
+      "has_data": {
+        "Delivery": false,
+        "System Health": false,
+        "Incidents": false,
+        "Code Quality": false,
+        "Estate Hygiene": false,
+        "Ops Readiness": false,
+        "People": true
+      },
+      "overall": 50.0
+    }
+  ],
+  "leadership": [],
+  "dimensions": [
+    "Delivery",
+    "System Health",
+    "Incidents",
+    "Code Quality",
+    "Estate Hygiene",
+    "Ops Readiness",
+    "People"
+  ],
+  "data_sources": {
+    "backlog_health": {
+      "rows": 1986,
+      "updated": "19 Jun 2026 14:41"
+    },
+    "github_metrics": {
+      "rows": 279,
+      "updated": "24 Jun 2026 12:44"
+    },
+    "repo_health": {
+      "rows": 227,
+      "updated": "19 Jun 2026 14:41"
+    },
+    "pagerduty_standards": {
+      "rows": 38,
+      "updated": "19 Jun 2026 14:41"
+    },
+    "pagerduty_incidents": {
+      "rows": 0,
+      "updated": "unknown"
+    },
+    "itsm_incidents": {
+      "rows": 1179,
+      "updated": "24 Jun 2026 12:44"
+    },
+    "itsm_changes": {
+      "rows": 81,
+      "updated": "24 Jun 2026 12:44"
+    },
+    "dynatrace_services": {
+      "rows": 5022,
+      "updated": "19 Jun 2026 14:41"
+    },
+    "catalog_info": {
+      "rows": 229,
+      "updated": "19 Jun 2026 14:41"
+    },
+    "actions_health": {
+      "rows": 0,
+      "updated": "unknown"
+    }
+  }
+}

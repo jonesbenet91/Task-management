@@ -1,0 +1,39 @@
+Product Group,Team Name,TPM ,Applications,JIRA Project Name,JIRA Board Name/Key,JIRA Board ID
+Supplier & Product,Supplier Management,Umamaheswari,OFP-PO Amendment,Foods - Supplier Management,FSMTC,465
+Supplier & Product,Supplier Commercials & Payment,Umamaheswari,RDA,Supplier Commercial and Payments,SCAPC,469
+Supplier & Product,Supplier Commercials & Payment,Umamaheswari,Food Costprice Service,Supplier Commercial and Payments,SCAPC,469
+Supplier & Product,Product Quality & Safety,Saraswathi,OFP-Connect,Foods Product Quality and Safety,FPQSC,466
+Supplier & Product,Food Product Data,Vibasini S,FMD,Food Product Data,FPDC,468
+Supplier & Product,Food Product Data,Vibasini S,FPS,Food Product Data,FPDC,468
+Supplier & Product,Food Product Data- SAP Decoupling,Arun Chandrasekharan,PID,Food Product Data,FPDC,468
+Supplier & Product,Food Product Data- SAP Decoupling,Arun Chandrasekharan,FUPS,Food Product Data,FPDC,468
+Supplier & Product,Food Product Data - FIND,Sasirekha Sathyanarayanan,FIND,FIND Program Management,FINDC,467
+Supplier & Product,Product & Packaging Development,Vibasini S,Digipal,Food Product & Packaging Development,FPPDC,464
+Supplier & Product,Product & Packaging Development,Vibasini S,FCAP,Food Product & Packaging Development,FPPDC,464
+Supplier & Product,Core One Food Platform,Saraswathi,OFP_CORE,Core One Food Platform,COFPC,463
+Food Commercial Trading,Pricing and Promotions,Dhinesh,Promo Service,Food Pricing and Promotions(PAP),FPAPC,9828
+Food Commercial Trading,Pricing and Promotions,Dhinesh,E2E Elims,Food Pricing and Promotions(PAP),FPAPC,9828
+Food Commercial Trading,Pricing and Promotions,Dhinesh,Price Domain Services,Food Pricing and Promotions(PAP),FPAPC,9828
+Food Commercial Trading,Space & Assortment Planning,Dhanya Ramesh,SRD DS,Space and Assortment Planning,SRDC,472
+Food Commercial Trading,Space & Assortment Planning,Dhanya Ramesh,Blue Yonder,Space and Assortment Planning,SRDC,472
+Food Commercial Trading,Third-party Relationship Management,Ambiga Lingaraj ,FAS,Third Party Relationship Management,TPRMC,471
+Food Commercial Trading,Third-party Relationship Management,Ambiga Lingaraj ,FSSL,Third Party Relationship Management,TPRMC,471
+Product flow,FOA Team-1,Naveen Kumar Bojjankula,Quantum,FOA Quantum,FOAQC,473
+Product flow,FOA Team-1,Naveen Kumar Bojjankula,CXM,FOA Quantum,FOAQC,473
+Product flow,ASO,Puviyarasu Ponnusamy,ASO,FOA ASO,FOAAC,474
+Product flow,Order Management Team,"Senathipathy, Prabhu",ORCA,Food Order Management,FORDC,477
+Product flow,Order Management Team,"Senathipathy, Prabhu",CA,Food Order Management,FORDC,477
+Product flow,Order Management Team,"Senathipathy, Prabhu",IFO,Food international ordering,FOIFC,478
+Product flow,Food Inventory Team-1,Sathish thirumoorthi,FITS,Food Inventory,FINVC,481
+Product flow,Supply Chain Planning Team (SCRD),Sasikala G,SCRD,Food Supply chain Planning,FSCPC,476
+Product flow,"Food Export, Customs & Excise",Hari prasad Tj,Duty Master,Food Export Customs Excise,FECEC,479
+Product flow,"Food Export, Customs & Excise",Hari prasad Tj,RGR/PGF,Food Export Customs Excise,FECEC,479
+Product flow,"Food Export, Customs & Excise",Hari prasad Tj,Export Documentation Repository,Food Export Customs Excise,FECEC,479
+Product flow,"Food Export, Customs & Excise",Hari prasad Tj,SIGHT,Food Export Customs Excise,FECEC,479
+Product flow,FOA (RELEX),James Parry,FOA/Relex,FOA - RELEX Solution,FOATR,2926
+Product flow,FOA-Integration-1 (NGFOA),Anbuselvi,NGFOA/Relex,FOA - RELEX Solution,FOATRC,475
+Product flow,FOA Integration Team ,Edwin A,NA,FOA integration,FOAIC,482
+Warehousing,Ambient Warehouse,Shahul hameed,BY WMS,JDA- Foods Warehousing,JDAFWC,1521
+Warehousing,Ambient Warehouse,Sheeba,FLIC,JDA- Foods Warehousing,JDAFWC,1521
+Warehousing,WIAS platform,Yasasvi Kuchibhatla,WIAS,Warehouse Integration Adaptor Service (WIAS),WIASC,484
+Warehousing,GLASS,Sheeba/Vijay,GLASS,Foods Network Strategy Foundation,FNSFC,485

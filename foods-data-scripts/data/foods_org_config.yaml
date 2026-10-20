@@ -1,0 +1,463 @@
+# Foods D&T Engineering Intelligence - Canonical Configuration
+# Source of truth for org structure, teams, people, and tool mappings
+# Maintained by: Ramesh Reddy Adutla (Staff SE, PAP)
+# Owner: Sandhya Radhakrishnan (HoSE, Foods)
+
+# ─────────────────────────────────────────────────────────────
+# FOODS D&T LEADERSHIP
+# ─────────────────────────────────────────────────────────────
+domain:
+  name: "Foods D&T"
+  leadership:
+    enterprise_architect:
+      name: "Alistair Jacques"
+      role: "Food & FH&B Enterprise Arch"
+    senior_head_of_product:
+      name: "Rich Burrows"
+      role: "SHoP"
+    senior_head_of_se:
+      name: "Sam Clement"
+      role: "SHoSE"
+    senior_head_of_tpm:
+      name: "Claire Attwell"
+      role: "SHoTPM"
+    principal_engineer:
+      name: "Tim Mason"
+      role: "PE"
+    head_of_product:
+      name: "Zoe Kendrick"
+      role: "HoP"
+    head_of_product_management:
+      name: "Vacancy"
+      role: "HoPM"
+    heads_of_tpm:
+      - name: "Graeme Boag"
+        role: "HoTPM"
+      - name: "Nico Pansier"
+        role: "HoTPM"
+      - name: "Sian Baker"
+        role: "HoTPM"
+    heads_of_engineering:
+      - name: "Callum Smith"
+        role: "HoE"
+      - name: "Mark Whittaker"
+        role: "HoE"
+    head_of_se:
+      name: "Sandhya Radhakrishnan"
+      role: "HoSE"
+    architects:
+      - name: "Chandrapandian Mayilvahanan"
+        role: "Arch"
+      - name: "Vivek Biradavolu"
+        role: "Arch"
+    engagement_manager:
+      name: "Jayachandran Krishnan"
+      role: "Engagement Manager"
+    devops_co_lead:
+      name: "Pradeep Pushparajan"
+      role: "DevOps Co-Lead"
+
+# ─────────────────────────────────────────────────────────────
+# SUB-DOMAINS
+# ─────────────────────────────────────────────────────────────
+sub_domains:
+
+  # ─── DESIGN, BUY & MAKE ──────────────────────────────────
+  - id: "design-buy-make"
+    name: "Design, Buy & Make"
+    shared: false
+    teams:
+
+      - id: "food-product-data"
+        name: "Food Product Data"
+        systems: ["FMD", "FUPS"]
+        people:
+          pm: "Ankita"
+          # EM, Staff, TPM from Miro
+        jira:
+          project_key: null  # TODO: confirm
+          board_id: null
+        pagerduty:
+          team_ids: ["P3O0SWX", "PLRL8YW"]
+        repos: []  # TODO: map from repos.csv
+
+      - id: "food-product-packaging-dev"
+        name: "Food Product & Packaging Development"
+        systems: ["FPS", "PID"]
+        people:
+          pm: "Bhulakshmi"
+          tpm: "Sheeba S"
+        jira:
+          project_key: null
+          board_id: null
+        pagerduty:
+          team_ids: []
+        repos: []
+
+      - id: "food-product-quality-safety"
+        name: "Food Product Quality & Safety"
+        systems: ["PQS"]
+        people:
+          pm: "Dave Davis"
+        jira:
+          project_key: null
+          board_id: null
+        pagerduty:
+          team_ids: []
+        repos: []
+
+      - id: "food-supplier-commercial-payments"
+        name: "Food Supplier Commercial & Payments"
+        systems: ["FSS", "POA", "Commercial Agreements"]
+        people:
+          pm: "Rachel Breeze"
+        jira:
+          project_key: null
+          board_id: null
+        pagerduty:
+          team_ids: []
+        repos: []
+
+      - id: "food-supplier-management"
+        name: "Food Supplier Management & Experience"
+        systems: ["Supplier Contact Directory", "Supplier Hub"]
+        people:
+          pm: "Bhulakshmi"
+        jira:
+          project_key: null
+          board_id: null
+        pagerduty:
+          team_ids: []
+        repos: []
+
+      - id: "food-ordering"
+        name: "Food Ordering"
+        systems: ["OFP", "ORCA"]
+        people:
+          em: "Zoe Broad"
+          staff_engineer: "Sathish Velusamy"
+        jira:
+          project_key: null
+          board_id: null
+        pagerduty:
+          team_ids: ["P1UU76K"]
+        repos: []
+
+      - id: "international-food-ordering"
+        name: "International Food Ordering"
+        systems: ["IFO", "IFOS"]
+        people:
+          em: "Vacancy"
+        jira:
+          project_key: null
+          board_id: null
+        pagerduty:
+          team_ids: ["PJKOZFV"]
+        repos: []
+
+      - id: "find-plm"
+        name: "FIND (PLM)"
+        systems: ["FIND"]
+        people:
+          arch_sme: "Shrikant Shetty"
+        jira:
+          project_key: null
+          board_id: null
+        pagerduty:
+          team_ids: []
+        repos: []
+
+      - id: "digipal-fgap"
+        name: "DigiPal / FGAP"
+        systems: ["DigiPal", "FGAP", "CRD", "FCS", "FAS"]
+        people:
+          staff_engineer: "Sakthi Santhosh"
+          arch: "Carlos"
+        jira:
+          project_key: null
+          board_id: null
+        pagerduty:
+          team_ids: []
+        repos: []
+
+  # ─── COMMERCIAL PLANNING (SHARED) ───────────────────────
+  - id: "commercial-planning"
+    name: "Commercial Planning"
+    shared: true
+    shared_with: "Another HoSE (TBC)"
+    teams:
+
+      - id: "price-promotion-execution"
+        name: "Price and Promotion Execution"
+        short_name: "PAP"
+        systems: ["PDS", "PPMS", "E2E", "PT"]
+        people:
+          pm: "Dave Davis"
+          staff_engineer: "Ramesh Reddy Adutla"
+          staff_engineer_2: "Keerthi Vasudevan"
+          stpm: "Francis Burt"
+          qa_lead: "Dmitry Panfilov"
+          em: "James Parry (temp)"
+          engineers:
+            - "Abhilipsa Bahali (FE)"
+            - "Arhum Ashraf (BE)"
+            - "Naga Vishnu (BE)"
+            - "Mohit Kumar (FE)"
+            - "Krishna Priya R S (BE)"
+        jira:
+          project_key: "FPAPC"
+          board_ids: [470]
+        pagerduty:
+          team_ids: []  # TODO: confirm PAP PD team
+        dynatrace:
+          service_ids: []  # TODO: map PDS/PPMS services
+        repos:
+          - "foods-price-domain-service"
+          - "foods-promotion-system"
+          - "foods-promotion-system-ui"
+
+      - id: "space-range-display"
+        name: "Space, Range and Display"
+        short_name: "SRD"
+        systems: ["SRD", "Blueyonder"]
+        people:
+          em: "Pushpa Rajendran"
+          staff_engineer: "Rakesh Rajanna"
+          pm: "Elizabeth Ross"
+        jira:
+          project_key: null
+          board_id: null
+        pagerduty:
+          team_ids: []
+        repos: []
+
+      - id: "food-partner-datashare"
+        name: "Food Partner Datashare"
+        systems: []
+        people: {}
+        jira:
+          project_key: null
+          board_id: null
+        pagerduty:
+          team_ids: []
+        repos: []
+
+      - id: "optumera"
+        name: "Optumera Squad"
+        systems: ["Optumera"]
+        people:
+          pm: "Elizabeth Ross"
+        jira:
+          project_key: null
+          board_id: null
+        pagerduty:
+          team_ids: []
+        repos: []
+
+      - id: "forecasting-ordering"
+        name: "Forecasting & Ordering"
+        systems: ["RELEX"]
+        people:
+          em: "Suyash Bhatnagar"
+          spm: "Linsley Green"
+        jira:
+          project_key: null
+          board_id: null
+        pagerduty:
+          team_ids: []
+        repos: []
+
+      - id: "supply-chain-planning"
+        name: "Supply Chain Planning"
+        systems: []
+        people:
+          pm: "Riya"
+        jira:
+          project_key: null
+          board_id: null
+        pagerduty:
+          team_ids: []
+        repos: []
+
+      - id: "stock-allocation"
+        name: "Stock Allocation"
+        systems: ["ASO"]
+        people:
+          pm: "Stephanie Fotheringham-Singh"
+          em: "Luca Mariglio"
+        jira:
+          project_key: null
+          board_id: null
+        pagerduty:
+          team_ids: []
+        repos: []
+
+  # ─── SUPPLY CHAIN & LOGISTICS ───────────────────────────
+  - id: "supply-chain-logistics"
+    name: "Supply Chain & Logistics"
+    shared: false
+    teams:
+
+      - id: "food-export-customs"
+        name: "Food Export, Customs & Duty"
+        systems: ["SIGHT", "EDR", "PGF/RGR", "Duty Master"]
+        people:
+          pm: "Hafi Imam"
+        jira:
+          project_key: null
+          board_id: null
+        pagerduty:
+          team_ids: []
+        repos: []
+
+      - id: "food-inventory"
+        name: "Food Inventory"
+        systems: ["FITS"]
+        people:
+          em: "Luca Mariglio"
+        jira:
+          project_key: null
+          board_id: null
+        pagerduty:
+          team_ids: []
+        repos: []
+
+      - id: "foal"
+        name: "FOAL"
+        systems: ["FOAL"]
+        people: {}
+        jira:
+          project_key: null
+          board_id: null
+        pagerduty:
+          team_ids: []
+        repos: []
+
+      - id: "warehouse-platform"
+        name: "Warehouse Platform"
+        systems: ["CXM", "SCRD", "FVCAP", "WIAS"]
+        people:
+          em: "Vacancy"
+          staff_engineer: "Vacancy"
+        jira:
+          project_key: null
+          board_id: null
+        pagerduty:
+          team_ids: ["PBFPHNK"]
+        repos: []
+
+      - id: "yard-booking"
+        name: "Yard & Booking Management"
+        systems: []
+        people: {}
+        jira:
+          project_key: null
+          board_id: null
+        pagerduty:
+          team_ids: []
+        repos: []
+
+      - id: "foods-network"
+        name: "Foods Network Team"
+        systems: []
+        people:
+          neethu: "Neethu Cherian"
+          mahendran: "Mahendran Mahalingam"
+        jira:
+          project_key: null
+          board_id: null
+        pagerduty:
+          team_ids: []
+        repos: []
+
+      - id: "foods-platform"
+        name: "Foods Platform Team"
+        systems: []
+        people:
+          devops_co_lead: "Pradeep Pushparajan"
+        jira:
+          project_key: null
+          board_id: null
+        pagerduty:
+          team_ids: []
+        repos: []
+
+      - id: "gist"
+        name: "GIST"
+        systems: []
+        people:
+          spm: "Steven Miller"
+        jira:
+          project_key: null
+          board_id: null
+        pagerduty:
+          team_ids: ["PPJBJ6V"]
+        repos: []
+
+# ─────────────────────────────────────────────────────────────
+# HEAT MAP DIMENSIONS (scoring config)
+# ─────────────────────────────────────────────────────────────
+heat_map:
+  dimensions:
+    - id: "delivery"
+      name: "Delivery Health"
+      description: "Sprint velocity, burndown, created vs resolved, blocked items"
+      sources: ["jira"]
+      thresholds:
+        green: 80   # score >= 80
+        amber: 50   # score >= 50
+        red: 0      # score < 50
+
+    - id: "system-health"
+      name: "System Health"
+      description: "Dynatrace service availability, error rates, response times"
+      sources: ["dynatrace", "azure"]
+      thresholds:
+        green: 90
+        amber: 70
+        red: 0
+
+    - id: "incidents"
+      name: "Incidents & Alerts"
+      description: "PagerDuty incidents, ITSM tickets, severity distribution"
+      sources: ["pagerduty", "itsm"]
+      thresholds:
+        green: 90
+        amber: 60
+        red: 0
+
+    - id: "code-quality"
+      name: "Code & Repo Quality"
+      description: "PR health, stale branches, test coverage, security findings"
+      sources: ["github", "ghas"]
+      thresholds:
+        green: 80
+        amber: 50
+        red: 0
+
+    - id: "estate-hygiene"
+      name: "Estate Hygiene"
+      description: "Tech stack currency, dependency drift, catalog completeness"
+      sources: ["github", "techstack"]
+      thresholds:
+        green: 85
+        amber: 60
+        red: 0
+
+    - id: "operational-readiness"
+      name: "Operational Readiness"
+      description: "PagerDuty standards, on-call coverage, runbooks, escalation policies"
+      sources: ["pagerduty"]
+      thresholds:
+        green: 80
+        amber: 50
+        red: 0
+
+    - id: "people-capacity"
+      name: "People & Capacity"
+      description: "Vacancies, team size, supplier mix, key person risk"
+      sources: ["manual"]
+      thresholds:
+        green: 80
+        amber: 50
+        red: 0

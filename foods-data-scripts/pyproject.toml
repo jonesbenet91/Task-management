@@ -1,0 +1,25 @@
+[tool.ruff]
+target-version = "py310"
+line-length = 120
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = [
+    "E",    # pycodestyle errors
+    "F",    # pyflakes
+    "I",    # isort
+    "B",    # flake8-bugbear
+]
+ignore = [
+    "E501",   # line length (handled by formatter)
+    "F401",   # unused imports (too many pre-existing, will clean up separately)
+    "E722",   # bare except (pre-existing across several commands)
+    "B904",   # raise from within except (pre-existing, clean up separately)
+    "I001",   # import sort order (pre-existing, clean up separately)
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["datascripts"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

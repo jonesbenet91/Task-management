@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Foods D&T Engineering Vitals</title>
+<script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+<script>window.d3 || document.write('<script src="./d3.min.js"><\/script>')</script>
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+<script>window.ApexCharts || document.write('<script src="./apexcharts.min.js"><\/script>')</script>
+<style>
+:root {
+  --bg: #0a0a0f; --bg2: #111118;
+  --surface: rgba(22,22,32,0.72); --surface-solid: #16161f;
+  --surface-hover: rgba(30,30,45,0.85);
+  --glass: rgba(255,255,255,0.03); --glass-border: rgba(255,255,255,0.06);
+  --border: rgba(255,255,255,0.08);
+  --text: #e8e8ef; --text2: #9898a8; --text3: #5c5c6e;
+  --accent: #6366f1; --accent2: #818cf8;
+  --green: #34d399; --amber: #fbbf24; --red: #f87171;
+  --green-bg: rgba(52,211,153,0.1); --amber-bg: rgba(251,191,36,0.1); --red-bg: rgba(248,113,113,0.1);
+  --radius: 16px; --radius-sm: 10px; --radius-xs: 6px;
+  --shadow: 0 4px 24px rgba(0,0,0,0.3); --shadow-lg: 0 8px 40px rgba(0,0,0,0.4);
+  --transition: 0.25s cubic-bezier(0.4,0,0.2,1);
+}
+html[data-theme="light"] {
+  --bg: #f0f0f5; --bg2: #e8e8ef;
+  --surface: rgba(255,255,255,0.72); --surface-solid: #ffffff;
+  --surface-hover: rgba(255,255,255,0.9);
+  --glass: rgba(255,255,255,0.5); --glass-border: rgba(0,0,0,0.06);
+  --border: rgba(0,0,0,0.08);
+  --text: #1a1a2e; --text2: #5a5a72; --text3: #9898a8;
+  --shadow: 0 4px 24px rgba(0,0,0,0.08); --shadow-lg: 0 8px 40px rgba(0,0,0,0.12);
+}
+*,*::before,*::after { margin:0;padding:0;box-sizing:border-box; }
+html { scroll-behavior:smooth; }
+body {
+  font-family:'Inter',-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',system-ui,sans-serif;
+  background:var(--bg); color:var(--text); letter-spacing:-0.3px; min-height:100vh; overflow-x:hidden;
+  padding-top:48px;
+}
+body::before {
+  content:''; position:fixed; inset:0; z-index:-1;
+  background: radial-gradient(ellipse 80% 60% at 20% 10%,rgba(99,102,241,0.08),transparent),
+    radial-gradient(ellipse 60% 50% at 80% 80%,rgba(52,211,153,0.06),transparent),
+    radial-gradient(ellipse 70% 40% at 50% 50%,rgba(248,113,113,0.04),transparent);
+  animation:bgShift 20s ease-in-out infinite alternate;
+}
+@keyframes bgShift { 0%{opacity:.7;transform:scale(1)} 100%{opacity:1;transform:scale(1.05)} }
+/* Site-wide nav bar (consistent with other dashboards) */
+.site-nav { position:fixed;top:0;left:0;right:0;z-index:9999;background:#161b22;border-bottom:1px solid #30363d;height:48px;padding:0;margin:0;display:block;box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; }
+.site-nav-inner { max-width:1900px;margin:0 auto;padding:0 20px;display:flex;align-items:center;justify-content:flex-start;height:100%; }
+.site-nav-brand { color:#e6edf3;font-weight:700;font-size:14px;text-decoration:none;display:flex;align-items:center;gap:6px;white-space:nowrap;padding-right:16px;border-right:1px solid #30363d;margin-right:14px; }
+.site-nav-brand:hover { color:#58a6ff; }
+.site-nav-home { color:#58a6ff;text-decoration:none;font-size:13px;font-weight:600;white-space:nowrap;display:flex;align-items:center;gap:4px; }
+.site-nav-home:hover { color:#79b8ff; }
+.site-nav-sep { color:#8b949e;margin:0 8px;font-size:14px; }
+.site-nav-current { color:#e6edf3;font-size:13px;font-weight:500;white-space:nowrap; }
+.site-nav-current-home { color:#58a6ff;font-size:13px;font-weight:600;white-space:nowrap; }
+.site-nav-links { margin-left:auto;display:flex;gap:2px;align-items:center;overflow-x:auto;scrollbar-width:none; }
+.site-nav-links::-webkit-scrollbar { display:none; }
+.site-nav-link { color:#8b949e;text-decoration:none;font-size:12px;font-weight:500;padding:5px 10px;border-radius:6px;white-space:nowrap;transition:all 0.15s; }
+.site-nav-link:hover,.site-nav-link.nav-active { background:#21262d;color:#e6edf3; }
+.site-nav-link.nav-active { color:#58a6ff; }
+nav {
+  position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;
+  padding:12px 32px;background:var(--surface);backdrop-filter:blur(20px) saturate(180%);
+  -webkit-backdrop-filter:blur(20px) saturate(180%);border-bottom:1px solid var(--glass-border);
+}
+.nav-left{display:flex;align-items:center;gap:16px}
+.nav-logo{width:36px;height:36px;background:linear-gradient(135deg,var(--accent),var(--green));border-radius:10px;display:grid;place-items:center;font-weight:800;font-size:16px;color:#fff}
+.nav-title{font-weight:700;font-size:18px}
+.nav-sub{color:var(--text2);font-size:13px;font-weight:400}
+.nav-tabs{display:flex;gap:4px}
+.nav-tab{padding:8px 18px;border-radius:8px;font-size:13px;font-weight:500;color:var(--text2);cursor:pointer;transition:var(--transition);border:none;background:transparent}
+.nav-tab:hover{color:var(--text);background:var(--glass)}
+.nav-tab.active{color:var(--text);background:rgba(99,102,241,0.15);box-shadow:inset 0 0 0 1px rgba(99,102,241,0.3)}
+.theme-toggle{width:36px;height:36px;border-radius:10px;border:1px solid var(--border);background:var(--glass);color:var(--text);cursor:pointer;font-size:16px;display:grid;place-items:center;transition:var(--transition)}
+.theme-toggle:hover{background:var(--surface-hover)}
+.container{max-width:1440px;margin:0 auto;padding:24px 32px}
+.view{display:none;animation:fadeIn .4s ease} .view.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.kpi-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px}
+.kpi-card{background:var(--surface);backdrop-filter:blur(16px);border:1px solid var(--glass-border);border-radius:var(--radius);padding:20px;transition:var(--transition)}
+.kpi-card:hover{transform:translateY(-2px);box-shadow:var(--shadow)}
+.kpi-label{font-size:12px;font-weight:500;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
+.kpi-row{display:flex;align-items:flex-end;justify-content:space-between}
+.kpi-value{font-size:32px;font-weight:800;line-height:1}
+.kpi-spark{width:80px;height:36px}
+.kpi-change{font-size:12px;font-weight:600;margin-top:6px}
+.kpi-change.up{color:var(--green)} .kpi-change.down{color:var(--red)}
+.subdomain-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-bottom:28px}
+.subdomain-card{background:var(--surface);backdrop-filter:blur(16px);border:1px solid var(--glass-border);border-radius:var(--radius);padding:24px;transition:var(--transition);cursor:pointer}
+.subdomain-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-lg);border-color:rgba(99,102,241,0.2)}
+.subdomain-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px}
+.subdomain-name{font-size:15px;font-weight:700} .subdomain-teams{font-size:12px;color:var(--text3);margin-top:2px}
+.subdomain-score{font-size:28px;font-weight:800}
+.subdomain-chart{height:160px;margin:0 -8px}
+.subdomain-dims{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;margin-top:14px}
+.subdomain-dim{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text2)}
+.subdomain-dim .dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.subdomain-dim .dim-val{margin-left:auto;font-weight:600;font-size:12px}
+.heatmap-section{background:var(--surface);backdrop-filter:blur(16px);border:1px solid var(--glass-border);border-radius:var(--radius);padding:24px}
+.section-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+.section-title{font-size:16px;font-weight:700} .section-sub{font-size:12px;color:var(--text3)}
+#heatmap-container svg{width:100%} #heatmap-container text{font-family:inherit}
+.dim-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:24px}
+.dim-tab{padding:6px 16px;border-radius:20px;font-size:12px;font-weight:500;color:var(--text2);border:1px solid var(--border);background:transparent;cursor:pointer;transition:var(--transition)}
+.dim-tab:hover{border-color:var(--accent);color:var(--text)}
+.dim-tab.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.ranked-list{display:flex;flex-direction:column;gap:10px}
+.ranked-item{display:grid;grid-template-columns:32px 1.2fr 80px 1fr 60px 50px;align-items:center;gap:12px;background:var(--surface);backdrop-filter:blur(16px);border:1px solid var(--glass-border);border-radius:var(--radius-sm);padding:14px 18px;transition:var(--transition);cursor:pointer}
+.ranked-item:hover{transform:translateX(4px);border-color:rgba(99,102,241,0.2)}
+.rank{font-size:14px;font-weight:700;color:var(--text3);text-align:center}
+.ranked-team{font-size:13px;font-weight:600} .ranked-sub{font-size:11px;color:var(--text3)}
+.ranked-spark{height:32px}
+.ranked-bar-wrap{height:6px;background:var(--glass);border-radius:3px;overflow:hidden}
+.ranked-bar{height:100%;border-radius:3px;transition:width .8s cubic-bezier(.4,0,.2,1)}
+.ranked-score{font-size:18px;font-weight:800;text-align:right}
+.ranked-trend{font-size:11px;font-weight:600;text-align:center;padding:2px 8px;border-radius:12px}
+.trend-up{color:var(--green);background:var(--green-bg)}
+.trend-down{color:var(--red);background:var(--red-bg)}
+.trend-flat{color:var(--amber);background:var(--amber-bg)}
+.people-section{margin-bottom:24px} .people-title{font-size:14px;font-weight:700;margin-bottom:14px;color:var(--text2)}
+.people-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}
+.person-card{display:flex;align-items:center;gap:12px;background:var(--surface);border:1px solid var(--glass-border);border-radius:var(--radius-sm);padding:14px 16px;transition:var(--transition)}
+.person-card:hover{transform:translateY(-2px);box-shadow:var(--shadow)}
+
+.person-avatar{width:38px;height:38px;border-radius:10px;display:grid;place-items:center;font-weight:700;font-size:14px;color:#fff;flex-shrink:0}
+.person-name{font-size:13px;font-weight:600} .person-role{font-size:11px;color:var(--text3)}
+.modal-overlay{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.6);backdrop-filter:blur(8px);display:none;place-items:center;animation:fadeIn .2s ease}
+.modal-overlay.open{display:grid}
+.modal{background:var(--surface-solid);border:1px solid var(--glass-border);border-radius:20px;width:90%;max-width:640px;max-height:85vh;overflow-y:auto;padding:32px;animation:modalIn .3s cubic-bezier(.4,0,.2,1)}
+@keyframes modalIn{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:none}}
+.modal-close{float:right;width:32px;height:32px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--text);font-size:18px;cursor:pointer;display:grid;place-items:center}
+.modal-close:hover{background:var(--glass)}
+.modal h2{font-size:20px;font-weight:700;margin-bottom:4px}
+.modal .modal-sub{font-size:13px;color:var(--text2);margin-bottom:20px}
+.modal-dims{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.modal-dim-card{background:var(--glass);border:1px solid var(--glass-border);border-radius:var(--radius-sm);padding:14px}
+.modal-dim-label{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+.modal-dim-score{font-size:24px;font-weight:800}
+.modal-dim-spark{height:40px;margin-top:8px}
+.data-sources{margin-top:20px;padding:16px;background:var(--glass);border:1px solid var(--glass-border);border-radius:var(--radius-sm)}
+.data-sources-title{font-size:12px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
+.ds-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:6px}
+.ds-item{font-size:11px;color:var(--text2);display:flex;justify-content:space-between}
+.ds-item .ds-count{font-weight:700;color:var(--text)}
+.hm-tooltip{position:fixed;z-index:10000;pointer-events:none;opacity:0;transition:opacity 0.15s;max-width:320px;padding:14px 16px;border-radius:12px;background:var(--surface-solid);border:1px solid var(--border);box-shadow:0 12px 32px rgba(0,0,0,0.4);font-size:12px;line-height:1.5;color:var(--text)}
+.hm-tooltip.visible{opacity:1}
+.hm-tooltip .tt-header{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.hm-tooltip .tt-dim{font-weight:700;font-size:13px}
+.hm-tooltip .tt-score{font-weight:800;font-size:18px;margin-left:auto}
+.hm-tooltip .tt-team{font-size:11px;color:var(--text2);margin-bottom:6px}
+.hm-tooltip .tt-desc{color:var(--text2);margin-bottom:6px}
+.hm-tooltip .tt-meter{height:4px;border-radius:2px;background:var(--glass);margin-bottom:6px}
+.hm-tooltip .tt-meter-fill{height:100%;border-radius:2px;transition:width 0.3s}
+.hm-tooltip .tt-label{font-size:10px;color:var(--text2);font-style:italic}
+.hm-tooltip .tt-sources{font-size:10px;color:var(--text2);margin-top:4px;padding-top:4px;border-top:1px solid var(--border)}
+.subdomain-card{cursor:pointer;transition:var(--transition)}
+.subdomain-card:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,0.15)}
+.subdomain-card.sd-active{ring:2px solid var(--accent);outline:2px solid var(--accent);outline-offset:2px}
+.kpi-card{cursor:pointer;transition:var(--transition)}
+.kpi-card:hover{transform:translateY(-2px);box-shadow:0 4px 16px rgba(0,0,0,0.12)}
+.sd-filter-bar{display:none;align-items:center;gap:10px;padding:10px 16px;margin-bottom:12px;background:var(--glass);border-radius:10px;border:1px solid var(--border)}
+.sd-filter-bar.visible{display:flex}
+.sd-filter-bar .filter-label{font-size:12px;color:var(--text2)}
+.sd-filter-bar .filter-name{font-size:13px;font-weight:700;color:var(--accent)}
+.sd-filter-bar .filter-clear{margin-left:auto;font-size:11px;color:var(--text2);cursor:pointer;padding:4px 10px;border-radius:6px;border:1px solid var(--border);background:transparent;transition:var(--transition)}
+.sd-filter-bar .filter-clear:hover{background:var(--glass);color:var(--text)}
+::-webkit-scrollbar{width:6px} ::-webkit-scrollbar-track{background:transparent} ::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+@media(max-width:1024px){.kpi-strip{grid-template-columns:repeat(2,1fr)}.subdomain-grid{grid-template-columns:1fr}.ranked-item{grid-template-columns:32px 1fr 60px 50px}.ranked-spark,.ranked-bar-wrap{display:none}}
+@media(max-width:640px){nav{padding:12px 16px;flex-wrap:wrap;gap:8px}.container{padding:16px}.kpi-strip{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<nav class="site-nav"><div class="site-nav-inner"><a class="site-nav-brand" href="../parent.html">🍎 Foods Engineering</a><a class="site-nav-home" href="../parent.html">🏠 Home</a><span class="site-nav-sep">›</span><span class="site-nav-current">Eng Vitals</span><div class="site-nav-links"><a class="site-nav-link" href="../githubmetrics.html">GitHub Metrics</a><a class="site-nav-link" href="../techstackview.html">Tech Stack</a><a class="site-nav-link" href="../repohealth.html">Repo Health</a><a class="site-nav-link" href="../servicecatalogue.html">Service Catalogue</a><a class="site-nav-link" href="../pagerdutystandard.html">PagerDuty Standards</a><a class="site-nav-link" href="../pagerdutyincidents.html">PagerDuty Incidents</a><a class="site-nav-link" href="../itsmbmcincidentview.html">ITSM Incidents</a><a class="site-nav-link" href="../itsmbmcchangerequest.html">Change Requests</a><a class="site-nav-link" href="../snykaging.html">Snyk Aging</a><a class="site-nav-link" href="../backloghealth.html">Backlog Health</a><a class="site-nav-link" href="../sprintperformance.html">Sprint Performance</a><a class="site-nav-link nav-active" href="../heatmap.html">Eng Vitals</a><a class="site-nav-link" href="../estate.html">Estate</a></div></div></nav>
+<nav>
+  <div class="nav-left">
+    <div class="nav-logo">F</div>
+    <div>
+      <div class="nav-title">Engineering Vitals</div>
+      <div class="nav-sub" id="navSub">Engineering Health</div>
+    </div>
+  </div>
+  <div class="nav-tabs">
+    <button class="nav-tab active" data-view="overview">Overview</button>
+    <button class="nav-tab" data-view="dimension">By Dimension</button>
+    <button class="nav-tab" data-view="people">People</button>
+  </div>
+  <button class="theme-toggle" id="themeToggle">&#9790;</button>
+  <select class="week-selector" id="weekSelector" title="View historical data" style="background:#1e293b;color:#e2e8f0;border:1px solid #334155;border-radius:6px;padding:4px 8px;font-size:12px;cursor:pointer;margin-left:8px;">
+    <option value="current">This week</option>
+  </select>
+</nav>
+<div class="container">
+  <div class="view active" id="view-overview">
+    <div class="kpi-strip" id="kpiStrip"></div>
+    <div class="subdomain-grid" id="subdomainGrid"></div>
+    <div class="heatmap-section">
+      <div class="section-header">
+        <div><div class="section-title">Team Health Matrix</div><div class="section-sub">Hover cells for details, click to drill down. Click a sub-domain card above to filter.</div></div>
+      </div>
+      <div class="sd-filter-bar" id="sdFilterBar">
+        <span class="filter-label">Filtering:</span>
+        <span class="filter-name" id="sdFilterName"></span>
+        <button class="filter-clear" id="sdFilterClear">Clear filter</button>
+      </div>
+      <div id="heatmap-container"></div>
+    </div>
+    <div class="data-sources" style="margin-top:20px">
+      <div class="data-sources-title">Data Sources</div>
+      <div class="ds-grid" id="dsGrid"></div>
+    </div>
+  </div>
+  <div class="view" id="view-dimension">
+    <div class="dim-tabs" id="dimTabs"></div>
+    <div class="ranked-list" id="rankedList"></div>
+  </div>
+  <div class="view" id="view-people"><div id="peopleContainer"></div></div>
+</div>
+<div class="modal-overlay" id="modalOverlay"><div class="modal" id="modal"></div></div>
+<div class="hm-tooltip" id="hmTooltip"></div>
+<script>
+var DATA = {"generated_at": "2026-06-19T16:37:21.887921+00:00", "week": "W24 2026", "domain": {"name": {"name": "Foods D&T", "leadership": {"enterprise_architect": {"name": "Alistair Jacques", "role": "Food & FH&B Enterprise Arch"}, "senior_head_of_product": {"name": "Rich Burrows", "role": "SHoP"}, "senior_head_of_se": {"name": "Sam Clement", "role": "SHoSE"}, "senior_head_of_tpm": {"name": "Claire Attwell", "role": "SHoTPM"}, "principal_engineer": {"name": "Tim Mason", "role": "PE"}, "head_of_product": {"name": "Zoe Kendrick", "role": "HoP"}, "head_of_product_management": {"name": "Vacancy", "role": "HoPM"}, "heads_of_tpm": [{"name": "Graeme Boag", "role": "HoTPM"}, {"name": "Nico Pansier", "role": "HoTPM"}, {"name": "Sian Baker", "role": "HoTPM"}], "heads_of_engineering": [{"name": "Callum Smith", "role": "HoE"}, {"name": "Mark Whittaker", "role": "HoE"}], "head_of_se": {"name": "Sandhya Radhakrishnan", "role": "HoSE"}, "architects": [{"name": "Chandrapandian Mayilvahanan", "role": "Arch"}, {"name": "Vivek Biradavolu", "role": "Arch"}], "engagement_manager": {"name": "Jayachandran Krishnan", "role": "Engagement Manager"}, "devops_co_lead": {"name": "Pradeep Pushparajan", "role": "DevOps Co-Lead"}}}, "scores": {"Delivery": 42.3, "System Health": 67.5, "Incidents": 65.8, "Code Quality": 47.4, "Estate Hygiene": 62.7, "Ops Readiness": 67.5, "People": 51.9}, "overall": 57.9}, "subdomains": [{"subdomain_id": "design-buy-make", "subdomain_name": "Design, Buy & Make", "team_count": 9, "scores": {"Delivery": 38.2, "System Health": 70.9, "Incidents": 68.9, "Code Quality": 32.9, "Estate Hygiene": 70.1, "Ops Readiness": 70.9, "People": 50.0}, "overall": 57.4}, {"subdomain_id": "commercial-planning", "subdomain_name": "Commercial Planning", "team_count": 7, "scores": {"Delivery": 44.1, "System Health": 66.1, "Incidents": 59.3, "Code Quality": 53.5, "Estate Hygiene": 53.4, "Ops Readiness": 66.1, "People": 56.4}, "overall": 57.0}, {"subdomain_id": "supply-chain-logistics", "subdomain_name": "Supply Chain & Logistics", "team_count": 8, "scores": {"Delivery": 45.5, "System Health": 65.0, "Incidents": 68.1, "Code Quality": 58.4, "Estate Hygiene": 62.4, "Ops Readiness": 65.0, "People": 50.0}, "overall": 59.2}], "teams": [{"team_id": "food-product-data", "team_name": "Food Product Data", "subdomain_id": "design-buy-make", "subdomain_name": "Design, Buy & Make", "scores": {"Delivery": 65.4, "System Health": 100.0, "Incidents": 75.0, "Code Quality": 45.0, "Estate Hygiene": 85.7, "Ops Readiness": 100.0, "People": 50.0}, "has_data": {"Delivery": true, "System Health": true, "Incidents": true, "Code Quality": true, "Estate Hygiene": true, "Ops Readiness": true, "People": true}, "overall": 74.4}, {"team_id": "food-product-packaging-dev", "team_name": "Food Product & Packaging Development", "subdomain_id": "design-buy-make", "subdomain_name": "Design, Buy & Make", "scores": {"Delivery": 23.3, "System Health": 100.0, "Incidents": 75.0, "Code Quality": 0.0, "Estate Hygiene": 33.3, "Ops Readiness": 100.0, "People": 50.0}, "has_data": {"Delivery": true, "System Health": true, "Incidents": true, "Code Quality": true, "Estate Hygiene": true, "Ops Readiness": true, "People": true}, "overall": 54.5}, {"team_id": "food-product-quality-safety", "team_name": "Food Product Quality & Safety", "subdomain_id": "design-buy-make", "subdomain_name": "Design, Buy & Make", "scores": {"Delivery": 23.1, "System Health": 50.0, "Incidents": 75.0, "Code Quality": 50.0, "Estate Hygiene": 50.0, "Ops Readiness": 50.0, "People": 50.0}, "has_data": {"Delivery": true, "System Health": false, "Incidents": true, "Code Quality": false, "Estate Hygiene": false, "Ops Readiness": false, "People": true}, "overall": 49.7}, {"team_id": "food-supplier-commercial-payments", "team_name": "Food Supplier Commercial & Payments", "subdomain_id": "design-buy-make", "subdomain_name": "Design, Buy & Make", "scores": {"Delivery": 50.0, "System Health": 50.0, "Incidents": 75.0, "Code Quality": 63.0, "Estate Hygiene": 100.0, "Ops Readiness": 50.0, "People": 50.0}, "has_data": {"Delivery": false, "System Health": false, "Incidents": true, "Code Quality": true, "Estate Hygiene": true, "Ops Readiness": false, "People": true}, "overall": 62.6}, {"team_id": "food-supplier-management", "team_name": "Food Supplier Management & Experience", "subdomain_id": "design-buy-make", "subdomain_name": "Design, Buy & Make", "scores": {"Delivery": 0.0, "System Health": 50.0, "Incidents": 75.0, "Code Quality": 50.0, "Estate Hygiene": 50.0, "Ops Readiness": 50.0, "People": 50.0}, "has_data": {"Delivery": true, "System Health": false, "Incidents": true, "Code Quality": false, "Estate Hygiene": false, "Ops Readiness": false, "People": true}, "overall": 46.4}, {"team_id": "food-ordering", "team_name": "Food Ordering", "subdomain_id": "design-buy-make", "subdomain_name": "Design, Buy & Make", "scores": {"Delivery": 50.0, "System Health": 87.9, "Incidents": 75.0, "Code Quality": 38.4, "Estate Hygiene": 82.1, "Ops Readiness": 87.9, "People": 50.0}, "has_data": {"Delivery": false, "System Health": true, "Incidents": true, "Code Quality": true, "Estate Hygiene": true, "Ops Readiness": true, "People": true}, "overall": 67.3}, {"team_id": "international-food-ordering", "team_name": "International Food Ordering", "subdomain_id": "design-buy-make", "subdomain_name": "Design, Buy & Make", "scores": {"Delivery": 50.0, "System Health": 50.0, "Incidents": 75.0, "Code Quality": 0.0, "Estate Hygiene": 100.0, "Ops Readiness": 50.0, "People": 50.0}, "has_data": {"Delivery": false, "System Health": false, "Incidents": true, "Code Quality": true, "Estate Hygiene": true, "Ops Readiness": false, "People": true}, "overall": 53.6}, {"team_id": "find-plm", "team_name": "FIND (PLM)", "subdomain_id": "design-buy-make", "subdomain_name": "Design, Buy & Make", "scores": {"Delivery": 65.4, "System Health": 50.0, "Incidents": 75.0, "Code Quality": 50.0, "Estate Hygiene": 50.0, "Ops Readiness": 50.0, "People": 50.0}, "has_data": {"Delivery": true, "System Health": false, "Incidents": true, "Code Quality": false, "Estate Hygiene": false, "Ops Readiness": false, "People": true}, "overall": 55.8}, {"team_id": "digipal-fgap", "team_name": "DigiPal / FGAP", "subdomain_id": "design-buy-make", "subdomain_name": "Design, Buy & Make", "scores": {"Delivery": 17.0, "System Health": 100.0, "Incidents": 20.0, "Code Quality": 0.0, "Estate Hygiene": 80.0, "Ops Readiness": 100.0, "People": 50.0}, "has_data": {"Delivery": true, "System Health": true, "Incidents": true, "Code Quality": true, "Estate Hygiene": true, "Ops Readiness": true, "People": true}, "overall": 52.4}, {"team_id": "price-promotion-execution", "team_name": "Price and Promotion Execution", "subdomain_id": "commercial-planning", "subdomain_name": "Commercial Planning", "scores": {"Delivery": 41.4, "System Health": 50.0, "Incidents": 75.0, "Code Quality": 32.3, "Estate Hygiene": 100.0, "Ops Readiness": 50.0, "People": 95.0}, "has_data": {"Delivery": true, "System Health": false, "Incidents": true, "Code Quality": true, "Estate Hygiene": true, "Ops Readiness": false, "People": true}, "overall": 63.4}, {"team_id": "space-range-display", "team_name": "Space, Range and Display", "subdomain_id": "commercial-planning", "subdomain_name": "Commercial Planning", "scores": {"Delivery": 50.0, "System Health": 87.9, "Incidents": 75.0, "Code Quality": 71.0, "Estate Hygiene": 37.5, "Ops Readiness": 87.9, "People": 50.0}, "has_data": {"Delivery": false, "System Health": true, "Incidents": true, "Code Quality": true, "Estate Hygiene": true, "Ops Readiness": true, "People": true}, "overall": 65.6}, {"team_id": "food-partner-datashare", "team_name": "Food Partner Datashare", "subdomain_id": "commercial-planning", "subdomain_name": "Commercial Planning", "scores": {"Delivery": 50.0, "System Health": 50.0, "Incidents": 75.0, "Code Quality": 50.0, "Estate Hygiene": 50.0, "Ops Readiness": 50.0, "People": 50.0}, "has_data": {"Delivery": false, "System Health": false, "Incidents": true, "Code Quality": false, "Estate Hygiene": false, "Ops Readiness": false, "People": true}, "overall": 53.6}, {"team_id": "optumera", "team_name": "Optumera Squad", "subdomain_id": "commercial-planning", "subdomain_name": "Commercial Planning", "scores": {"Delivery": 50.0, "System Health": 50.0, "Incidents": 75.0, "Code Quality": 50.0, "Estate Hygiene": 50.0, "Ops Readiness": 50.0, "People": 50.0}, "has_data": {"Delivery": false, "System Health": false, "Incidents": true, "Code Quality": false, "Estate Hygiene": false, "Ops Readiness": false, "People": true}, "overall": 53.6}, {"team_id": "forecasting-ordering", "team_name": "Forecasting & Ordering", "subdomain_id": "commercial-planning", "subdomain_name": "Commercial Planning", "scores": {"Delivery": 50.0, "System Health": 87.9, "Incidents": 20.0, "Code Quality": 50.0, "Estate Hygiene": 50.0, "Ops Readiness": 87.9, "People": 50.0}, "has_data": {"Delivery": false, "System Health": true, "Incidents": true, "Code Quality": false, "Estate Hygiene": false, "Ops Readiness": true, "People": true}, "overall": 56.5}, {"team_id": "supply-chain-planning", "team_name": "Supply Chain Planning", "subdomain_id": "commercial-planning", "subdomain_name": "Commercial Planning", "scores": {"Delivery": 17.0, "System Health": 50.0, "Incidents": 75.0, "Code Quality": 50.0, "Estate Hygiene": 50.0, "Ops Readiness": 50.0, "People": 50.0}, "has_data": {"Delivery": true, "System Health": false, "Incidents": true, "Code Quality": false, "Estate Hygiene": false, "Ops Readiness": false, "People": true}, "overall": 48.9}, {"team_id": "stock-allocation", "team_name": "Stock Allocation", "subdomain_id": "commercial-planning", "subdomain_name": "Commercial Planning", "scores": {"Delivery": 50.0, "System Health": 87.1, "Incidents": 20.0, "Code Quality": 71.2, "Estate Hygiene": 36.4, "Ops Readiness": 87.1, "People": 50.0}, "has_data": {"Delivery": false, "System Health": true, "Incidents": true, "Code Quality": true, "Estate Hygiene": true, "Ops Readiness": true, "People": true}, "overall": 57.4}, {"team_id": "food-export-customs", "team_name": "Food Export, Customs & Duty", "subdomain_id": "supply-chain-logistics", "subdomain_name": "Supply Chain & Logistics", "scores": {"Delivery": 50.0, "System Health": 94.0, "Incidents": 75.0, "Code Quality": 63.5, "Estate Hygiene": 80.0, "Ops Readiness": 94.0, "People": 50.0}, "has_data": {"Delivery": false, "System Health": true, "Incidents": true, "Code Quality": true, "Estate Hygiene": true, "Ops Readiness": true, "People": true}, "overall": 72.4}, {"team_id": "food-inventory", "team_name": "Food Inventory", "subdomain_id": "supply-chain-logistics", "subdomain_name": "Supply Chain & Logistics", "scores": {"Delivery": 46.6, "System Health": 84.4, "Incidents": 75.0, "Code Quality": 80.8, "Estate Hygiene": 86.7, "Ops Readiness": 84.4, "People": 50.0}, "has_data": {"Delivery": true, "System Health": true, "Incidents": true, "Code Quality": true, "Estate Hygiene": true, "Ops Readiness": true, "People": true}, "overall": 72.6}, {"team_id": "foal", "team_name": "FOAL", "subdomain_id": "supply-chain-logistics", "subdomain_name": "Supply Chain & Logistics", "scores": {"Delivery": 50.0, "System Health": 50.0, "Incidents": 75.0, "Code Quality": 50.0, "Estate Hygiene": 50.0, "Ops Readiness": 50.0, "People": 50.0}, "has_data": {"Delivery": false, "System Health": false, "Incidents": true, "Code Quality": false, "Estate Hygiene": false, "Ops Readiness": false, "People": true}, "overall": 53.6}, {"team_id": "warehouse-platform", "team_name": "Warehouse Platform", "subdomain_id": "supply-chain-logistics", "subdomain_name": "Supply Chain & Logistics", "scores": {"Delivery": 17.0, "System Health": 91.9, "Incidents": 20.0, "Code Quality": 72.7, "Estate Hygiene": 82.1, "Ops Readiness": 91.9, "People": 50.0}, "has_data": {"Delivery": true, "System Health": true, "Incidents": true, "Code Quality": true, "Estate Hygiene": true, "Ops Readiness": true, "People": true}, "overall": 60.8}, {"team_id": "yard-booking", "team_name": "Yard & Booking Management", "subdomain_id": "supply-chain-logistics", "subdomain_name": "Supply Chain & Logistics", "scores": {"Delivery": 50.0, "System Health": 50.0, "Incidents": 75.0, "Code Quality": 50.0, "Estate Hygiene": 50.0, "Ops Readiness": 50.0, "People": 50.0}, "has_data": {"Delivery": false, "System Health": false, "Incidents": true, "Code Quality": false, "Estate Hygiene": false, "Ops Readiness": false, "People": true}, "overall": 53.6}, {"team_id": "foods-network", "team_name": "Foods Network Team", "subdomain_id": "supply-chain-logistics", "subdomain_name": "Supply Chain & Logistics", "scores": {"Delivery": 50.0, "System Health": 50.0, "Incidents": 75.0, "Code Quality": 50.0, "Estate Hygiene": 50.0, "Ops Readiness": 50.0, "People": 50.0}, "has_data": {"Delivery": false, "System Health": false, "Incidents": true, "Code Quality": false, "Estate Hygiene": false, "Ops Readiness": false, "People": true}, "overall": 53.6}, {"team_id": "foods-platform", "team_name": "Foods Platform Team", "subdomain_id": "supply-chain-logistics", "subdomain_name": "Supply Chain & Logistics", "scores": {"Delivery": 50.0, "System Health": 50.0, "Incidents": 75.0, "Code Quality": 50.0, "Estate Hygiene": 50.0, "Ops Readiness": 50.0, "People": 50.0}, "has_data": {"Delivery": false, "System Health": false, "Incidents": true, "Code Quality": false, "Estate Hygiene": false, "Ops Readiness": false, "People": true}, "overall": 53.6}, {"team_id": "gist", "team_name": "GIST", "subdomain_id": "supply-chain-logistics", "subdomain_name": "Supply Chain & Logistics", "scores": {"Delivery": 50.0, "System Health": 50.0, "Incidents": 75.0, "Code Quality": 50.0, "Estate Hygiene": 50.0, "Ops Readiness": 50.0, "People": 50.0}, "has_data": {"Delivery": false, "System Health": false, "Incidents": true, "Code Quality": false, "Estate Hygiene": false, "Ops Readiness": false, "People": true}, "overall": 53.6}], "leadership": [], "dimensions": ["Delivery", "System Health", "Incidents", "Code Quality", "Estate Hygiene", "Ops Readiness", "People"], "data_sources": {"backlog_health": {"rows": 1986, "updated": "19 Jun 2026 14:41"}, "github_metrics": {"rows": 279, "updated": "19 Jun 2026 14:41"}, "repo_health": {"rows": 227, "updated": "19 Jun 2026 14:41"}, "pagerduty_standards": {"rows": 38, "updated": "19 Jun 2026 14:41"}, "pagerduty_incidents": {"rows": 0, "updated": "unknown"}, "itsm_incidents": {"rows": 1179, "updated": "19 Jun 2026 14:41"}, "itsm_changes": {"rows": 81, "updated": "19 Jun 2026 14:41"}, "dynatrace_services": {"rows": 5022, "updated": "19 Jun 2026 14:41"}, "catalog_info": {"rows": 229, "updated": "19 Jun 2026 14:41"}, "actions_health": {"rows": 0, "updated": "unknown"}}};
+var DIMENSIONS = DATA.dimensions;
+var DIM_COLORS = ['#6366f1','#34d399','#f87171','#818cf8','#fbbf24','#06b6d4','#f472b6'];
+var teamData = DATA.teams;
+var subdomainData = DATA.subdomains;
+var overallScore = DATA.domain.overall;
+var activeSubdomain = null;
+
+var DIM_INFO = {
+  'Delivery': {
+    desc: 'Measures backlog health from Jira: ticket quality scores, blocked ratio, and overdue items.',
+    sources: 'Jira backlog health CSV',
+    good: '75+: Clean backlog, few blocked/overdue items',
+    bad: 'Below 50: High blocked ratio or many stale tickets'
+  },
+  'System Health': {
+    desc: 'PagerDuty service standards compliance and Dynatrace service health status.',
+    sources: 'PagerDuty Standards, Dynatrace Services',
+    good: '75+: Services meet PD standards, healthy in Dynatrace',
+    bad: 'Below 50: Missing escalation policies or degraded services'
+  },
+  'Incidents': {
+    desc: 'Fewer incidents = higher score. Counts PagerDuty alerts and ITSM tickets assigned to the team.',
+    sources: 'PagerDuty Incidents, ITSM Incident Dump',
+    good: '75+: Minimal incidents (stable systems)',
+    bad: 'Below 50: High incident volume, needs attention'
+  },
+  'Code Quality': {
+    desc: 'Repo hygiene: stale PRs, stale branches, open PR count, and CI/CD success rates.',
+    sources: 'Repo Health CSV, Actions Health CSV',
+    good: '75+: Clean repos, few stale PRs/branches',
+    bad: 'Below 50: Many stale PRs or failing pipelines'
+  },
+  'Estate Hygiene': {
+    desc: 'Percentage of repos with catalog-info.yaml (Backstage/service catalogue coverage).',
+    sources: 'Catalog Info CSV, Repos CSV',
+    good: '75+: Most repos have catalog-info',
+    bad: 'Below 50: Poor service catalogue coverage'
+  },
+  'Ops Readiness': {
+    desc: 'PagerDuty standards: escalation policies, on-call setup, schedule coverage, notification rules.',
+    sources: 'PagerDuty Standards CSV',
+    good: '75+: Well-configured on-call and escalation',
+    bad: 'Below 50: Missing on-call, no escalation policy'
+  },
+  'People': {
+    desc: 'Team capacity: filled vs vacant positions, team size (bus factor risk for small teams).',
+    sources: 'Foods Org Config YAML',
+    good: '75+: Fully staffed, adequate team size',
+    bad: 'Below 50: Multiple vacancies or single-person team'
+  }
+};
+
+document.getElementById('navSub').textContent = DATA.week + ' \u00b7 Updated ' + new Date(DATA.generated_at).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}) + ' \u00b7 ' + teamData.length + ' teams';
+
+function scoreColor(v) { return v >= 75 ? 'var(--green)' : v >= 50 ? 'var(--amber)' : 'var(--red)'; }
+function scoreColorHex(v) { return v >= 75 ? '#34d399' : v >= 50 ? '#fbbf24' : '#f87171'; }
+function trendClass(v) { return v > 2 ? 'trend-up' : v < -2 ? 'trend-down' : 'trend-flat'; }
+function trendText(v) { return v > 0 ? '+' + v.toFixed(1) : v.toFixed(1); }
+function initials(n) { return n.split(' ').map(function(w){return w[0]}).join('').slice(0,2); }
+function sparkData(n, base) { return Array.from({length:n}, function(_,i){return Math.round(base + (Math.random()-0.5)*20 + i*0.3)}); }
+
+function renderKPIs() {
+  var activeIncidents = teamData.reduce(function(s,t){return s + (t.scores['Incidents'] < 50 ? 1 : 0)}, 0);
+  var lowestDim = DIMENSIONS.reduce(function(low,d){var avg=teamData.reduce(function(s,t){return s+t.scores[d]},0)/teamData.length;return avg<low.v?{d:d,v:avg}:low},{d:'',v:999});
+  var kpis = [
+    {label:'Overall Score',value:overallScore,data:sparkData(8,overallScore),tip:'Weighted average across all teams and dimensions'},
+    {label:'Teams Tracked',value:teamData.length,data:sparkData(8,teamData.length),tip:'Total teams with health scores'},
+    {label:'Areas Below 50',value:activeIncidents,data:sparkData(8,activeIncidents),tip:'Teams scoring below 50 on any dimension (click to view)'},
+    {label:'Needs Attention',value:Math.round(lowestDim.v),data:sparkData(8,lowestDim.v),tip:lowestDim.d+': lowest average score across all teams (click to view)'}
+  ];
+  var strip = document.getElementById('kpiStrip');
+  strip.innerHTML = kpis.map(function(k,i) {
+    return '<div class="kpi-card" data-kpi="'+i+'" title="'+k.tip+'"><div class="kpi-label">' + k.label + '</div><div class="kpi-row"><div class="kpi-value" style="color:' + scoreColor(typeof k.value==='number'&&k.value<=100?k.value:75) + '">' + k.value + '</div><div class="kpi-spark" id="kpi-spark-' + i + '"></div></div></div>';
+  }).join('');
+  kpis.forEach(function(k,i) {
+    new ApexCharts(document.getElementById('kpi-spark-'+i), {
+      chart:{type:'area',height:36,width:80,sparkline:{enabled:true},animations:{enabled:true,speed:600}},
+      series:[{data:k.data}], stroke:{width:2,curve:'smooth'},
+      fill:{type:'gradient',gradient:{shadeIntensity:1,opacityFrom:0.4,opacityTo:0}},
+      colors:[scoreColorHex(typeof k.value==='number'&&k.value<=100?k.value:75)], tooltip:{enabled:false}
+    }).render();
+  });
+  strip.querySelectorAll('.kpi-card').forEach(function(card) {
+    card.addEventListener('click', function() {
+      var idx = parseInt(this.dataset.kpi);
+      if (idx === 2) {
+        activeDim = 'Incidents';
+        document.querySelectorAll('.nav-tab').forEach(function(t){t.classList.remove('active')});
+        document.querySelectorAll('.view').forEach(function(v){v.classList.remove('active')});
+        document.querySelector('[data-view="dimension"]').classList.add('active');
+        document.getElementById('view-dimension').classList.add('active');
+        renderDimTabs(); renderRankedList();
+      } else if (idx === 3) {
+        activeDim = lowestDim.d;
+        document.querySelectorAll('.nav-tab').forEach(function(t){t.classList.remove('active')});
+        document.querySelectorAll('.view').forEach(function(v){v.classList.remove('active')});
+        document.querySelector('[data-view="dimension"]').classList.add('active');
+        document.getElementById('view-dimension').classList.add('active');
+        renderDimTabs(); renderRankedList();
+      }
+    });
+  });
+}
+
+function renderSubdomains() {
+  var grid = document.getElementById('subdomainGrid');
+  grid.innerHTML = subdomainData.map(function(sd) {
+    var dims = DIMENSIONS.map(function(d,i) {
+      var v = sd.scores[d];
+      return '<div class="subdomain-dim"><span class="dot" style="background:'+DIM_COLORS[i]+'"></span><span>'+d+'</span><span class="dim-val" style="color:'+scoreColor(v)+'">'+v+'</span></div>';
+    }).join('');
+    return '<div class="subdomain-card" data-sd="'+sd.subdomain_id+'"><div class="subdomain-header"><div><div class="subdomain-name">'+sd.subdomain_name+'</div><div class="subdomain-teams">'+sd.team_count+' teams</div></div><div class="subdomain-score" style="color:'+scoreColor(sd.overall)+'">'+sd.overall+'</div></div><div class="subdomain-chart" id="radial-'+sd.subdomain_id+'"></div><div class="subdomain-dims">'+dims+'</div></div>';
+  }).join('');
+  subdomainData.forEach(function(sd) {
+    new ApexCharts(document.getElementById('radial-'+sd.subdomain_id), {
+      chart:{type:'radialBar',height:160,animations:{enabled:true,speed:800}},
+      series:DIMENSIONS.map(function(d){return sd.scores[d]}), labels:DIMENSIONS, colors:DIM_COLORS,
+      plotOptions:{radialBar:{hollow:{size:'30%'},track:{background:'var(--glass)',strokeWidth:'100%'},dataLabels:{name:{show:false},value:{show:true,fontSize:'14px',fontWeight:700,color:'var(--text)',offsetY:5,formatter:function(){return sd.overall}}}}},
+      stroke:{lineCap:'round'}, legend:{show:false}
+    }).render();
+  });
+  grid.querySelectorAll('.subdomain-card').forEach(function(card) {
+    card.addEventListener('click', function() {
+      var sdId = this.dataset.sd;
+      if (activeSubdomain === sdId) {
+        activeSubdomain = null;
+        grid.querySelectorAll('.subdomain-card').forEach(function(c){c.classList.remove('sd-active')});
+        document.getElementById('sdFilterBar').classList.remove('visible');
+      } else {
+        activeSubdomain = sdId;
+        grid.querySelectorAll('.subdomain-card').forEach(function(c){c.classList.remove('sd-active')});
+        this.classList.add('sd-active');
+        var sdName = subdomainData.find(function(s){return s.subdomain_id===sdId}).subdomain_name;
+        document.getElementById('sdFilterName').textContent = sdName;
+        document.getElementById('sdFilterBar').classList.add('visible');
+      }
+      renderHeatmap();
+    });
+  });
+  document.getElementById('sdFilterClear').addEventListener('click', function() {
+    activeSubdomain = null;
+    grid.querySelectorAll('.subdomain-card').forEach(function(c){c.classList.remove('sd-active')});
+    document.getElementById('sdFilterBar').classList.remove('visible');
+    renderHeatmap();
+  });
+}
+
+function renderHeatmap() {
+  var container = document.getElementById('heatmap-container');
+  container.innerHTML = '';
+  var isDark = document.documentElement.getAttribute('data-theme') !== 'light';
+  var textCol = isDark ? '#9898a8' : '#5a5a72';
+  var textColBright = isDark ? '#e8e8ef' : '#1a1a2e';
+  var gridCol = isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)';
+  var filteredTeams = activeSubdomain ? teamData.filter(function(t){return t.subdomain_id===activeSubdomain}) : teamData;
+  var margin = {top:40,right:20,bottom:10,left:200};
+  var cellH = 36, cellPad = 3;
+  var width = container.clientWidth - margin.left - margin.right;
+  var height = filteredTeams.length * (cellH + cellPad);
+  var svg = d3.select('#heatmap-container').append('svg')
+    .attr('width',width+margin.left+margin.right).attr('height',height+margin.top+margin.bottom)
+    .append('g').attr('transform','translate('+margin.left+','+margin.top+')');
+  var x = d3.scaleBand().domain(DIMENSIONS).range([0,width]).padding(0.08);
+  var y = d3.scaleBand().domain(filteredTeams.map(function(d){return d.team_name})).range([0,height]).padding(0.08);
+  var colorScale = d3.scaleLinear().domain([30,55,75,95]).range(['#ef4444','#f59e0b','#34d399','#22c55e']);
+  svg.selectAll('.col-label').data(DIMENSIONS).enter().append('text')
+    .attr('x',function(d){return x(d)+x.bandwidth()/2}).attr('y',-12).attr('text-anchor','middle')
+    .attr('fill',textCol).attr('font-size','11px').attr('font-weight','600').text(function(d){return d})
+    .attr('cursor','pointer')
+    .on('click',function(ev,d){
+      activeDim = d;
+      document.querySelectorAll('.nav-tab').forEach(function(t){t.classList.remove('active')});
+      document.querySelectorAll('.view').forEach(function(v){v.classList.remove('active')});
+      document.querySelector('[data-view="dimension"]').classList.add('active');
+      document.getElementById('view-dimension').classList.add('active');
+      renderDimTabs(); renderRankedList();
+    });
+  svg.selectAll('.row-label').data(filteredTeams).enter().append('text')
+    .attr('x',-12).attr('y',function(d){return y(d.team_name)+y.bandwidth()/2+4}).attr('text-anchor','end')
+    .attr('fill',textCol).attr('font-size','12px').attr('font-weight','500').text(function(d){return d.team_name})
+    .attr('cursor','pointer')
+    .on('click',function(ev,d){openModal(d)});
+  svg.selectAll('.row-bg').data(filteredTeams).enter().append('rect')
+    .attr('x',-8).attr('y',function(d){return y(d.team_name)-2}).attr('width',width+16).attr('height',y.bandwidth()+4)
+    .attr('fill','transparent').attr('rx',6)
+    .on('mouseenter',function(){d3.select(this).attr('fill',gridCol)})
+    .on('mouseleave',function(){d3.select(this).attr('fill','transparent')});
+  var cells = [];
+  filteredTeams.forEach(function(t){DIMENSIONS.forEach(function(d){cells.push({team:t.team_name,dim:d,value:t.scores[d],hasData:t.has_data?t.has_data[d]:true,teamData:t})});});
+  // Diagonal stripe pattern for no-data cells
+  var defs = d3.select('#heatmap-container svg').append('defs');
+  var pat = defs.append('pattern').attr('id','nodata-stripe').attr('width',6).attr('height',6).attr('patternUnits','userSpaceOnUse').attr('patternTransform','rotate(45)');
+  pat.append('rect').attr('width',6).attr('height',6).attr('fill',isDark?'rgba(255,255,255,0.04)':'rgba(0,0,0,0.04)');
+  pat.append('line').attr('x1',0).attr('y1',0).attr('x2',0).attr('y2',6).attr('stroke',isDark?'rgba(255,255,255,0.08)':'rgba(0,0,0,0.08)').attr('stroke-width',2);
+  var tooltip = document.getElementById('hmTooltip');
+  svg.selectAll('.cell').data(cells).enter().append('rect')
+    .attr('x',function(d){return x(d.dim)}).attr('y',function(d){return y(d.team)})
+    .attr('width',x.bandwidth()).attr('height',y.bandwidth()).attr('rx',6)
+    .attr('fill',function(d){return d.hasData?colorScale(d.value):'url(#nodata-stripe)'}).attr('opacity',function(d){return d.hasData?0.85:0.6}).attr('cursor','pointer')
+    .on('mouseenter',function(ev,d){
+      d3.select(this).attr('opacity',1).attr('stroke','#fff').attr('stroke-width',2);
+      var info = DIM_INFO[d.dim] || {};
+      if (!d.hasData) {
+        tooltip.innerHTML = '<div class="tt-header"><span class="tt-dim">' + d.dim + '</span><span class="tt-score" style="color:var(--text2)">N/A</span></div>'
+          + '<div class="tt-team">' + d.team + '</div>'
+          + '<div class="tt-desc">No data available for this dimension. The team may not be mapped in the config, or the data source has no matching records.</div>'
+          + '<div class="tt-sources">Expected: ' + (info.sources||'N/A') + '</div>';
+      } else {
+        var label = d.value >= 75 ? info.good : d.value >= 50 ? 'Moderate: room for improvement' : info.bad;
+        tooltip.innerHTML = '<div class="tt-header"><span class="tt-dim">' + d.dim + '</span><span class="tt-score" style="color:'+scoreColorHex(d.value)+'">' + Math.round(d.value) + '</span></div>'
+          + '<div class="tt-team">' + d.team + '</div>'
+          + '<div class="tt-meter"><div class="tt-meter-fill" style="width:'+d.value+'%;background:'+scoreColorHex(d.value)+'"></div></div>'
+          + '<div class="tt-desc">' + (info.desc||'') + '</div>'
+          + '<div class="tt-label">' + (label||'') + '</div>'
+          + '<div class="tt-sources">Data: ' + (info.sources||'N/A') + '</div>';
+      }
+      tooltip.classList.add('visible');
+    })
+    .on('mousemove',function(ev){
+      var tx = ev.clientX + 16, ty = ev.clientY - 10;
+      if (tx + 330 > window.innerWidth) tx = ev.clientX - 336;
+      if (ty + 200 > window.innerHeight) ty = ev.clientY - 200;
+      tooltip.style.left = tx + 'px';
+      tooltip.style.top = ty + 'px';
+    })
+    .on('mouseleave',function(){
+      d3.select(this).attr('opacity',function(d){return d.hasData?0.85:0.6}).attr('stroke','none');
+      tooltip.classList.remove('visible');
+    })
+    .on('click',function(ev,d){tooltip.classList.remove('visible');openModal(d.teamData)});
+  svg.selectAll('.cell-text').data(cells).enter().append('text')
+    .attr('x',function(d){return x(d.dim)+x.bandwidth()/2}).attr('y',function(d){return y(d.team)+y.bandwidth()/2+4})
+    .attr('text-anchor','middle').attr('fill',function(d){return !d.hasData?(isDark?'#555':'#bbb'):d.value>60?'#fff':textColBright})
+    .attr('font-size','12px').attr('font-weight','700').attr('pointer-events','none')
+    .text(function(d){return d.hasData?Math.round(d.value):'-'});
+}
+
+function renderDataSources() {
+  var ds = DATA.data_sources;
+  var grid = document.getElementById('dsGrid');
+  grid.innerHTML = Object.keys(ds).map(function(k) {
+    var info = ds[k];
+    var rows = typeof info === 'object' ? info.rows : info;
+    var updated = typeof info === 'object' ? info.updated : '';
+    return '<div class="ds-item"><span>' + k.replace(/_/g,' ') + '</span><span class="ds-count">' + rows + ' rows' + (updated ? ' \u00b7 ' + updated : '') + '</span></div>';
+  }).join('');
+}
+
+var activeDim = 'Delivery';
+function renderDimTabs() {
+  var tabs = document.getElementById('dimTabs');
+  tabs.innerHTML = DIMENSIONS.map(function(d,i) {
+    return '<button class="dim-tab'+(d===activeDim?' active':'')+'" data-dim="'+d+'" style="'+(d===activeDim?'background:'+DIM_COLORS[i]:'')+'">' + d + '</button>';
+  }).join('');
+  tabs.querySelectorAll('.dim-tab').forEach(function(btn) {
+    btn.addEventListener('click',function(){ activeDim=this.dataset.dim; renderDimTabs(); renderRankedList(); });
+  });
+}
+
+function renderRankedList() {
+  var sorted = teamData.slice().sort(function(a,b){return b.scores[activeDim]-a.scores[activeDim]});
+  var list = document.getElementById('rankedList');
+  list.innerHTML = sorted.map(function(t,i) {
+    var v = t.scores[activeDim];
+    var tr = (Math.random()-0.5)*10;
+    return '<div class="ranked-item" data-team="'+t.team_name+'"><div class="rank">#'+(i+1)+'</div><div><div class="ranked-team">'+t.team_name+'</div><div class="ranked-sub">'+t.subdomain_name+'</div></div><div class="ranked-spark" id="rank-spark-'+i+'"></div><div class="ranked-bar-wrap"><div class="ranked-bar" style="width:'+v+'%;background:'+scoreColorHex(v)+'"></div></div><div class="ranked-score" style="color:'+scoreColor(v)+'">'+Math.round(v)+'</div><div class="ranked-trend '+trendClass(tr)+'">'+trendText(tr)+'</div></div>';
+  }).join('');
+  sorted.forEach(function(t,i) {
+    var el = document.getElementById('rank-spark-'+i);
+    if(el) new ApexCharts(el,{chart:{type:'line',height:32,width:80,sparkline:{enabled:true},animations:{enabled:false}},series:[{data:sparkData(8,t.scores[activeDim])}],stroke:{width:2,curve:'smooth'},colors:[scoreColorHex(t.scores[activeDim])],tooltip:{enabled:false}}).render();
+  });
+  list.querySelectorAll('.ranked-item').forEach(function(item) {
+    item.addEventListener('click',function(){var team=teamData.find(function(t){return t.team_name===item.dataset.team});if(team)openModal(team);});
+  });
+}
+
+function renderPeople() {
+  var container = document.getElementById('peopleContainer');
+  var colors = ['#6366f1','#34d399','#818cf8','#06b6d4','#f472b6','#fbbf24'];
+  var leaderCards = (DATA.leadership||[]).map(function(p,i) {
+    return '<div class="person-card"><div class="person-avatar" style="background:linear-gradient(135deg,'+colors[i%colors.length]+','+colors[i%colors.length]+'88)">'+initials(p.name)+'</div><div><div class="person-name">'+p.name+'</div><div class="person-role">'+p.role+'</div></div></div>';
+  }).join('');
+  // Team headcount per sub-domain
+  var sdGroups = {};
+  teamData.forEach(function(t) {
+    if (!sdGroups[t.subdomain_name]) sdGroups[t.subdomain_name] = [];
+    sdGroups[t.subdomain_name].push(t);
+  });
+  var headcountHtml = Object.keys(sdGroups).map(function(sdName) {
+    var teams = sdGroups[sdName];
+    var rows = teams.map(function(t) {
+      var pScore = t.scores['People'];
+      return '<div class="ranked-item people-team-row" data-team="'+t.team_name+'" style="cursor:pointer;grid-template-columns:1fr 60px 80px"><div class="ranked-team">'+t.team_name+'</div><div class="ranked-score" style="color:'+scoreColor(pScore)+'">'+Math.round(pScore)+'</div><div style="font-size:11px;color:var(--text2)">People score</div></div>';
+    }).join('');
+    return '<div class="people-section"><div class="people-title">'+sdName+' ('+teams.length+' teams)</div>'+rows+'</div>';
+  }).join('');
+  container.innerHTML = '<div class="people-section"><div class="people-title">Leadership</div><div class="people-grid">'+leaderCards+'</div></div>' + headcountHtml;
+  container.querySelectorAll('.people-team-row').forEach(function(row) {
+    row.addEventListener('click', function() {
+      var team = teamData.find(function(x){return x.team_name === row.dataset.team});
+      if (team) openModal(team);
+    });
+  });
+}
+
+function openModal(team) {
+  var overlay = document.getElementById('modalOverlay');
+  var modal = document.getElementById('modal');
+  var dims = DIMENSIONS.map(function(d,i) {
+    var v = team.scores[d];
+    var info = DIM_INFO[d] || {};
+    return '<div class="modal-dim-card" style="cursor:default">'
+      + '<div class="modal-dim-label">' + d + '</div>'
+      + '<div class="modal-dim-score" style="color:'+scoreColor(v)+'">'+Math.round(v)+'</div>'
+      + '<div style="height:4px;border-radius:2px;background:var(--glass);margin:6px 0"><div style="height:100%;border-radius:2px;width:'+v+'%;background:'+scoreColorHex(v)+'"></div></div>'
+      + '<div class="modal-dim-spark" id="modal-spark-'+i+'"></div>'
+      + '<div style="font-size:10px;color:var(--text2);margin-top:4px">' + (info.desc||'') + '</div>'
+      + '</div>';
+  }).join('');
+  modal.innerHTML = '<button class="modal-close" id="modalClose">&times;</button>'
+    + '<h2>'+team.team_name+'</h2>'
+    + '<div class="modal-sub">'+team.subdomain_name+' \u00b7 Overall: <span style="font-weight:700;color:'+scoreColor(team.overall)+'">'+team.overall+'</span></div>'
+    + '<div class="modal-dims">'+dims+'</div>';
+  overlay.classList.add('open');
+  DIMENSIONS.forEach(function(d,i) {
+    var el = document.getElementById('modal-spark-'+i);
+    if(el) new ApexCharts(el,{chart:{type:'area',height:40,sparkline:{enabled:true},animations:{enabled:true,speed:500}},series:[{data:sparkData(8,team.scores[d])}],stroke:{width:2,curve:'smooth'},fill:{type:'gradient',gradient:{shadeIntensity:1,opacityFrom:0.3,opacityTo:0}},colors:[DIM_COLORS[i]],tooltip:{enabled:false}}).render();
+  });
+  document.getElementById('modalClose').addEventListener('click',function(){overlay.classList.remove('open')});
+  overlay.addEventListener('click',function(e){if(e.target===overlay)overlay.classList.remove('open')});
+}
+
+document.querySelectorAll('.nav-tab').forEach(function(tab) {
+  tab.addEventListener('click',function() {
+    document.querySelectorAll('.nav-tab').forEach(function(t){t.classList.remove('active')});
+    document.querySelectorAll('.view').forEach(function(v){v.classList.remove('active')});
+    this.classList.add('active');
+    document.getElementById('view-'+this.dataset.view).classList.add('active');
+    if(this.dataset.view==='dimension'){renderDimTabs();renderRankedList();}
+  });
+});
+document.getElementById('themeToggle').addEventListener('click',function() {
+  var html = document.documentElement;
+  var isLight = html.getAttribute('data-theme')==='light';
+  html.setAttribute('data-theme',isLight?'dark':'light');
+  this.textContent = isLight?'\u263E':'\u2600';
+  renderHeatmap();
+});
+
+renderKPIs(); renderSubdomains(); renderHeatmap(); renderPeople(); renderDataSources();
+
+// Week selector - load available weeks from index.json
+(function() {
+  var sel = document.getElementById('weekSelector');
+  if (!sel) return;
+  var base = '/foods-data-scripts/outputs/';
+  fetch(base + 'json/heat_map_scores/index.json')
+    .then(function(r) { return r.ok ? r.json() : []; })
+    .catch(function() { return []; })
+    .then(function(weeks) {
+      if (!weeks || !weeks.length) return;
+      weeks.slice().reverse().forEach(function(w) {
+        var opt = document.createElement('option');
+        opt.value = w;
+        opt.textContent = w.replace('_', ' ');
+        sel.appendChild(opt);
+      });
+    });
+  sel.addEventListener('change', function() {
+    if (this.value === 'current') return;
+    window.location.href = base + 'html/heatmap/' + this.value + '.html';
+  });
+})();
+</script>
+</body>
+</html>
