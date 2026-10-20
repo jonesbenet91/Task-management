@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JIRA Backlog Health Report</title>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<style>
+  :root {
+    --bg: #0d1117; --surface: #161b22; --surface2: #21262d; --border: #30363d;
+    --text: #e6edf3; --text-muted: #8b949e; --accent: #58a6ff;
+    --green: #3fb950; --yellow: #d29922; --red: #f85149; --orange: #db6d28;
+    --purple: #bc8cff;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; background: var(--bg); color: var(--text); line-height: 1.5; }
+  .app { max-width: 1600px; margin: 0 auto; padding: 20px; }
+  header { display: flex; justify-content: space-between; align-items: center; padding: 20px 0; border-bottom: 1px solid var(--border); margin-bottom: 20px; }
+  header h1 { font-size: 24px; font-weight: 600; }
+  header .meta { color: var(--text-muted); font-size: 13px; }
+
+  .stats-bar { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 24px; }
+  .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px 20px; min-width: 140px; flex: 1; }
+  .stat-card .label { color: var(--text-muted); font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .stat-card .value { font-size: 28px; font-weight: 700; margin-top: 4px; }
+
+  .controls { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; align-items: center; }
+  .controls input, .controls select { background: var(--surface); border: 1px solid var(--border); color: var(--text); padding: 8px 12px; border-radius: 6px; font-size: 14px; }
+  .controls input { min-width: 280px; }
+  .controls select { min-width: 180px; }
+  .controls input:focus, .controls select:focus { outline: none; border-color: var(--accent); }
+
+  .team-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(420px, 1fr)); gap: 16px; margin-bottom: 24px; }
+  .team-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 20px; cursor: pointer; transition: border-color 0.15s, transform 0.1s; }
+  .team-card:hover { border-color: var(--accent); transform: translateY(-1px); }
+  .team-card .team-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+  .team-card .team-name { font-size: 16px; font-weight: 600; }
+  .team-card .team-group { color: var(--text-muted); font-size: 12px; margin-top: 2px; }
+  .team-card .team-score { font-size: 24px; font-weight: 700; }
+  .team-card .team-stats { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 8px; }
+  .team-card .team-stat { font-size: 12px; color: var(--text-muted); }
+  .team-card .team-stat strong { color: var(--text); }
+
+  .score-bar { height: 4px; background: var(--surface2); border-radius: 2px; margin-top: 12px; overflow: hidden; }
+  .score-bar-fill { height: 100%; border-radius: 2px; transition: width 0.3s; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { text-align: left; padding: 10px 12px; background: var(--surface); border-bottom: 2px solid var(--border); color: var(--text-muted); font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; cursor: pointer; user-select: none; white-space: nowrap; }
+  th:hover { color: var(--accent); }
+  td { padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  tr:hover td { background: var(--surface); }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 600; }
+  .badge-success { background: rgba(63,185,80,0.15); color: var(--green); }
+  .badge-warning { background: rgba(210,153,34,0.15); color: var(--yellow); }
+  .badge-danger { background: rgba(248,81,73,0.15); color: var(--red); }
+  .badge-info { background: rgba(88,166,255,0.15); color: var(--accent); }
+  .badge-purple { background: rgba(188,140,255,0.15); color: var(--purple); }
+  .badge-muted { background: var(--surface2); color: var(--text-muted); }
+
+  .detail-panel { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 24px; margin-bottom: 24px; }
+  .detail-panel h2 { font-size: 20px; margin-bottom: 16px; display: flex; align-items: center; gap: 12px; }
+  .detail-panel .back-btn { background: none; border: 1px solid var(--border); color: var(--text-muted); padding: 4px 12px; border-radius: 6px; cursor: pointer; font-size: 13px; }
+  .detail-panel .back-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .detail-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; margin-bottom: 20px; }
+  .detail-item { background: var(--surface2); border-radius: 6px; padding: 12px; }
+  .detail-item .dlabel { color: var(--text-muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .detail-item .dvalue { font-size: 16px; font-weight: 600; margin-top: 4px; }
+
+  .cat-legend { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 12px; }
+  .cat-legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-muted); }
+  .cat-dot { width: 10px; height: 10px; border-radius: 50%; }
+
+  .quality-checks { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 8px; margin-top: 12px; }
+  .quality-check { display: flex; align-items: center; gap: 8px; padding: 6px 10px; background: var(--surface2); border-radius: 6px; font-size: 12px; }
+  .quality-check .check-icon { font-size: 14px; }
+
+  .section-title { font-size: 16px; font-weight: 600; margin: 20px 0 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+
+  .age-histogram { display: flex; align-items: flex-end; gap: 6px; height: 120px; padding: 0 4px; margin-top: 8px; }
+  .age-bar-group { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; height: 100%; justify-content: flex-end; }
+  .age-bar { width: 100%; min-width: 20px; border-radius: 4px 4px 0 0; transition: height 0.3s; position: relative; }
+  .age-bar-count { font-size: 11px; font-weight: 600; color: var(--text); text-align: center; }
+  .age-bar-label { font-size: 10px; color: var(--text-muted); text-align: center; white-space: nowrap; }
+
+  .empty-state { text-align: center; padding: 60px 20px; color: var(--text-muted); }
+
+  .loading-state { text-align: center; padding: 80px 20px; color: var(--text-muted); }
+  .loading-state .spinner { display: inline-block; width: 24px; height: 24px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 12px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  @media (max-width: 768px) {
+    .stats-bar { flex-direction: column; }
+    .team-grid { grid-template-columns: 1fr; }
+    .controls { flex-direction: column; }
+    .controls input, .controls select { min-width: 100%; }
+  }
+  /* ── Site Navigation ─────────────────────────────────────── */
+  .site-nav { position:fixed;top:0;left:0;right:0;z-index:9999;background:#161b22;border-bottom:1px solid #30363d;height:48px;padding:0;margin:0;display:block;box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; }
+  .site-nav-inner { max-width:1900px;margin:0 auto;padding:0 20px;display:flex;align-items:center;justify-content:flex-start;height:100%; }
+  .site-nav-brand { color:#e6edf3;font-weight:700;font-size:14px;text-decoration:none;display:flex;align-items:center;gap:6px;white-space:nowrap;padding-right:16px;border-right:1px solid #30363d;margin-right:14px; }
+  .site-nav-brand:hover { color:#58a6ff; }
+  .site-nav-home { color:#58a6ff;text-decoration:none;font-size:13px;font-weight:600;white-space:nowrap;display:flex;align-items:center;gap:4px; }
+  .site-nav-home:hover { color:#79b8ff; }
+  .site-nav-sep { color:#8b949e;margin:0 8px;font-size:14px; }
+  .site-nav-current { color:#e6edf3;font-size:13px;font-weight:500;white-space:nowrap; }
+  .site-nav-current-home { color:#58a6ff;font-size:13px;font-weight:600;white-space:nowrap; }
+  .site-nav-links { margin-left:auto;display:flex;gap:2px;align-items:center;overflow-x:auto;scrollbar-width:none; }
+  .site-nav-links::-webkit-scrollbar { display:none; }
+  .site-nav-link { color:#8b949e;text-decoration:none;font-size:12px;font-weight:500;padding:5px 10px;border-radius:6px;white-space:nowrap;transition:all 0.15s; }
+  .site-nav-link:hover,.site-nav-link.nav-active { background:#21262d;color:#e6edf3; }
+  .site-nav-link.nav-active { color:#58a6ff; }
+  body { padding-top:48px!important; }
+</style>
+</head>
+<body>
+<nav class="site-nav"><div class="site-nav-inner"><a class="site-nav-brand" href="parent.html">🍎 Foods Engineering</a><a class="site-nav-home" href="parent.html">🏠 Home</a><span class="site-nav-sep">›</span><span class="site-nav-current">Backlog Health</span><div class="site-nav-links"><a class="site-nav-link" href="githubmetrics.html">GitHub Metrics</a><a class="site-nav-link" href="techstackview.html">Tech Stack</a><a class="site-nav-link" href="repohealth.html">Repo Health</a><a class="site-nav-link" href="servicecatalogue.html">Service Catalogue</a><a class="site-nav-link" href="pagerdutystandard.html">PagerDuty Standards</a><a class="site-nav-link" href="pagerdutyincidents.html">PagerDuty Incidents</a><a class="site-nav-link" href="itsmbmcincidentview.html">ITSM Incidents</a><a class="site-nav-link" href="itsmbmcchangerequest.html">Change Requests</a><a class="site-nav-link" href="snykaging.html">Snyk Aging</a><a class="site-nav-link nav-active" href="backloghealth.html">Backlog Health</a><a class="site-nav-link" href="sprintperformance.html">Sprint Performance</a><a class="site-nav-link" href="heatmap.html">Eng Vitals</a><a class="site-nav-link" href="estate.html">Estate</a></div></div></nav>
+<div id="root"></div>
+<script type="text/babel">
+
+// ── CSV Loading and Parsing ─────────────────────────────────────────────────
+
+const CSV_PATH = '../csv/backlog_health.csv';
+
+function parseCSV(text) {
+  const lines = text.trim().split('\n');
+  if (lines.length < 2) return [];
+  const headers = parseCSVLine(lines[0]);
+  const rows = [];
+  for (let i = 1; i < lines.length; i++) {
+    if (!lines[i].trim()) continue;
+    const values = parseCSVLine(lines[i]);
+    const row = {};
+    headers.forEach((h, idx) => { row[h] = values[idx] || ''; });
+    rows.push(row);
+  }
+  return rows;
+}
+
+function parseCSVLine(line) {
+  const result = [];
+  let current = '';
+  let inQuotes = false;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (inQuotes) {
+      if (ch === '"') {
+        if (i + 1 < line.length && line[i + 1] === '"') {
+          current += '"';
+          i++;
+        } else {
+          inQuotes = false;
+        }
+      } else {
+        current += ch;
+      }
+    } else {
+      if (ch === '"') {
+        inQuotes = true;
+      } else if (ch === ',') {
+        result.push(current);
+        current = '';
+      } else {
+        current += ch;
+      }
+    }
+  }
+  result.push(current);
+  return result;
+}
+
+function buildTeamData(rows) {
+  const teamMap = {};
+  rows.forEach(row => {
+    const teamKey = row.project_key;
+    if (!teamMap[teamKey]) {
+      teamMap[teamKey] = {
+        team_name: row.team,
+        product_group: row.product_group,
+        project_key: row.project_key,
+        tickets: [],
+      };
+    }
+    const sp = row.story_points ? parseFloat(row.story_points) : null;
+    teamMap[teamKey].tickets.push({
+      key: row.key,
+      summary: row.summary,
+      type: row.type,
+      category: row.category,
+      status: row.status,
+      priority: row.priority,
+      assignee: row.assignee,
+      story_points: sp,
+      days_old: row.days_old ? parseInt(row.days_old, 10) : null,
+      quality_score: row.quality_score ? parseFloat(row.quality_score) : 0,
+      epic_key: row.epic_key || '',
+      url: row.url,
+    });
+  });
+
+  // Compute metrics for each team
+  return Object.values(teamMap).map(team => {
+    const tickets = team.tickets;
+    const total = tickets.length;
+    const sized = tickets.filter(t => t.story_points != null && t.story_points > 0);
+    const totalSp = sized.reduce((a, t) => a + t.story_points, 0);
+    const avgQuality = total ? Math.round(tickets.reduce((a, t) => a + t.quality_score, 0) / total * 10) / 10 : 0;
+    const ages = tickets.map(t => t.days_old).filter(d => d != null);
+    const avgAge = ages.length ? Math.round(ages.reduce((a, d) => a + d, 0) / ages.length) : 0;
+    const oldestDays = ages.length ? Math.max(...ages) : 0;
+
+    const categories = {};
+    tickets.forEach(t => {
+      if (!categories[t.category]) categories[t.category] = { count: 0, story_points: 0, sized: 0 };
+      categories[t.category].count++;
+      if (t.story_points != null && t.story_points > 0) {
+        categories[t.category].story_points += t.story_points;
+        categories[t.category].sized++;
+      }
+    });
+
+    const good = tickets.filter(t => t.quality_score >= 70).length;
+    const fair = tickets.filter(t => t.quality_score >= 40 && t.quality_score < 70).length;
+    const poor = tickets.filter(t => t.quality_score < 40).length;
+
+    team.metrics = {
+      total_tickets: total,
+      sized_tickets: sized.length,
+      unsized_tickets: total - sized.length,
+      avg_quality_score: avgQuality,
+      oldest_ticket_days: oldestDays,
+      avg_ticket_age_days: avgAge,
+      total_story_points: totalSp,
+      categories: categories,
+      quality_distribution: { good, fair, poor },
+    };
+    return team;
+  }).sort((a, b) => a.metrics.avg_quality_score - b.metrics.avg_quality_score);
+}
+
+// ── Helpers ─────────────────────────────────────────────────────────────────
+
+const CAT_COLORS = {
+  'Bugs & Incidents': 'var(--red)',
+  'Projects': 'var(--green)',
+  'Change': 'var(--yellow)',
+  'Tech Work': 'var(--accent)',
+};
+
+function scoreColor(score) {
+  if (score >= 70) return 'var(--green)';
+  if (score >= 40) return 'var(--yellow)';
+  return 'var(--red)';
+}
+
+function scoreBadge(score) {
+  if (score >= 70) return 'badge-success';
+  if (score >= 40) return 'badge-warning';
+  return 'badge-danger';
+}
+
+function daysAgoText(days) {
+  if (days === null || days === undefined) return '\u2014';
+  if (days === 0) return 'today';
+  if (days === 1) return '1 day';
+  if (days < 30) return days + ' days';
+  if (days < 365) return Math.floor(days / 30) + ' months';
+  return Math.floor(days / 365) + 'y ' + Math.floor((days % 365) / 30) + 'm';
+}
+
+function CategoryDonut({ categories, total, size }) {
+  if (!total) return null;
+  const r = (size || 60) / 2;
+  const stroke = r * 0.3;
+  const cr = r - stroke / 2;
+  const circumference = 2 * Math.PI * cr;
+  const cats = ['Bugs & Incidents', 'Projects', 'Change', 'Tech Work'];
+  let offset = 0;
+  const arcs = [];
+  cats.forEach(cat => {
+    const count = (categories[cat] || {}).count || 0;
+    if (!count) return;
+    const pct = count / total;
+    const dashLen = pct * circumference;
+    arcs.push({ cat, dashLen, offset, color: CAT_COLORS[cat] });
+    offset += dashLen;
+  });
+  return React.createElement('svg', { width: r * 2, height: r * 2, style: { display: 'block', margin: '8px auto 0' } },
+    React.createElement('circle', { cx: r, cy: r, r: cr, fill: 'none', stroke: 'var(--surface2)', strokeWidth: stroke }),
+    arcs.map((a, i) =>
+      React.createElement('circle', {
+        key: i, cx: r, cy: r, r: cr, fill: 'none',
+        stroke: a.color, strokeWidth: stroke,
+        strokeDasharray: a.dashLen + ' ' + (circumference - a.dashLen),
+        strokeDashoffset: -a.offset,
+        transform: 'rotate(-90 ' + r + ' ' + r + ')',
+        style: { transition: 'stroke-dasharray 0.3s, stroke-dashoffset 0.3s' }
+      })
+    ),
+    React.createElement('text', {
+      x: r, y: r, textAnchor: 'middle', dominantBaseline: 'central',
+      fill: 'var(--text)', fontSize: r * 0.38 + 'px', fontWeight: 700
+    }, total)
+  );
+}
+
+const AGE_BUCKETS = [
+  { label: '< 1w', max: 7, color: 'var(--green)' },
+  { label: '1\u20134w', max: 30, color: 'var(--green)' },
+  { label: '1\u20133m', max: 90, color: 'var(--yellow)' },
+  { label: '3\u20136m', max: 180, color: 'var(--yellow)' },
+  { label: '6m\u20131y', max: 365, color: 'var(--orange)' },
+  { label: '> 1y', max: Infinity, color: 'var(--red)' },
+];
+
+function AgeHistogram({ tickets }) {
+  if (!tickets || !tickets.length) return null;
+  const counts = AGE_BUCKETS.map(() => 0);
+  tickets.forEach(t => {
+    const d = t.days_old != null ? t.days_old : 0;
+    for (let i = 0; i < AGE_BUCKETS.length; i++) {
+      if (d <= AGE_BUCKETS[i].max) { counts[i]++; break; }
+    }
+  });
+  const maxCount = Math.max(...counts, 1);
+  return React.createElement('div', { className: 'age-histogram' },
+    AGE_BUCKETS.map((b, i) =>
+      React.createElement('div', { className: 'age-bar-group', key: i },
+        counts[i] > 0 ? React.createElement('div', { className: 'age-bar-count' }, counts[i]) : null,
+        React.createElement('div', {
+          className: 'age-bar',
+          style: { height: Math.max(counts[i] / maxCount * 90, counts[i] ? 4 : 0) + 'px', background: b.color, opacity: counts[i] ? 1 : 0.15 }
+        }),
+        React.createElement('div', { className: 'age-bar-label' }, b.label)
+      )
+    )
+  );
+}
+
+// ── Main App ────────────────────────────────────────────────────────────────
+
+function App() {
+  const [teamData, setTeamData] = React.useState(null);
+  const [loadError, setLoadError] = React.useState(null);
+  const [search, setSearch] = React.useState('');
+  const [groupFilter, setGroupFilter] = React.useState('');
+  const [selectedTeam, setSelectedTeam] = React.useState(null);
+  const [selectedTicket, setSelectedTicket] = React.useState(null);
+  const [sortCol, setSortCol] = React.useState('quality_score');
+  const [sortDir, setSortDir] = React.useState(-1);
+  const [catFilter, setCatFilter] = React.useState('');
+
+  React.useEffect(() => {
+    fetch(CSV_PATH)
+      .then(r => {
+        if (!r.ok) throw new Error('Failed to load CSV: ' + r.status);
+        return r.text();
+      })
+      .then(text => {
+        const rows = parseCSV(text);
+        const data = buildTeamData(rows);
+        setTeamData(data);
+      })
+      .catch(err => setLoadError(err.message));
+  }, []);
+
+  if (loadError) {
+    return React.createElement('div', { className: 'app' },
+      React.createElement('header', null,
+        React.createElement('h1', null, '\ud83d\udcca JIRA Backlog Health Report')
+      ),
+      React.createElement('div', { className: 'empty-state' },
+        React.createElement('p', { style: { color: 'var(--red)' } }, 'Error loading data: ' + loadError),
+        React.createElement('p', { style: { marginTop: '8px' } }, 'Ensure outputs/csv/backlog_health.csv exists.')
+      )
+    );
+  }
+
+  if (!teamData) {
+    return React.createElement('div', { className: 'app' },
+      React.createElement('div', { className: 'loading-state' },
+        React.createElement('div', { className: 'spinner' }),
+        React.createElement('p', null, 'Loading backlog health data...')
+      )
+    );
+  }
+
+  const TEAM_DATA = teamData;
+  const productGroups = [...new Set(TEAM_DATA.map(t => t.product_group).filter(Boolean))].sort();
+
+  // Global stats
+  const allTickets = TEAM_DATA.flatMap(t => t.tickets);
+  const totalTickets = allTickets.length;
+  const totalTeams = TEAM_DATA.length;
+  const avgQuality = totalTickets ? Math.round(allTickets.reduce((a, t) => a + t.quality_score, 0) / totalTickets) : 0;
+  const sizedPct = totalTickets ? Math.round(allTickets.filter(t => t.story_points > 0).length / totalTickets * 100) : 0;
+
+  // Filtering
+  const filteredTeams = TEAM_DATA.filter(t => {
+    if (search) {
+      const s = search.toLowerCase();
+      if (!t.team_name.toLowerCase().includes(s) && !t.product_group.toLowerCase().includes(s) && !t.project_key.toLowerCase().includes(s))
+        return false;
+    }
+    if (groupFilter && t.product_group !== groupFilter) return false;
+    return true;
+  });
+
+  const handleSort = (col) => {
+    if (sortCol === col) setSortDir(d => d * -1);
+    else { setSortCol(col); setSortDir(-1); }
+  };
+
+  // ── Ticket detail view ────────────────
+  if (selectedTicket) {
+    const t = selectedTicket;
+
+    return React.createElement('div', { className: 'app' },
+      React.createElement('header', null,
+        React.createElement('h1', null, '\ud83d\udcca JIRA Backlog Health'),
+        React.createElement('div', { className: 'meta' }, 'Data loaded from CSV')
+      ),
+      React.createElement('div', { className: 'detail-panel' },
+        React.createElement('h2', null,
+          React.createElement('button', { className: 'back-btn', onClick: () => setSelectedTicket(null) }, '\u2190 Back'),
+          React.createElement('a', { href: t.url, target: '_blank' }, t.key),
+          ' ',
+          t.summary
+        ),
+        React.createElement('div', { className: 'detail-grid' },
+          React.createElement('div', { className: 'detail-item' },
+            React.createElement('div', { className: 'dlabel' }, 'Quality Score'),
+            React.createElement('div', { className: 'dvalue', style: { color: scoreColor(t.quality_score) } }, t.quality_score + '%')
+          ),
+          React.createElement('div', { className: 'detail-item' },
+            React.createElement('div', { className: 'dlabel' }, 'Category'),
+            React.createElement('div', { className: 'dvalue' }, t.category)
+          ),
+          React.createElement('div', { className: 'detail-item' },
+            React.createElement('div', { className: 'dlabel' }, 'Type'),
+            React.createElement('div', { className: 'dvalue' }, t.type)
+          ),
+          React.createElement('div', { className: 'detail-item' },
+            React.createElement('div', { className: 'dlabel' }, 'Status'),
+            React.createElement('div', { className: 'dvalue' }, t.status)
+          ),
+          React.createElement('div', { className: 'detail-item' },
+            React.createElement('div', { className: 'dlabel' }, 'Priority'),
+            React.createElement('div', { className: 'dvalue' }, t.priority || '\u2014')
+          ),
+          React.createElement('div', { className: 'detail-item' },
+            React.createElement('div', { className: 'dlabel' }, 'Assignee'),
+            React.createElement('div', { className: 'dvalue' }, t.assignee || 'Unassigned')
+          ),
+          React.createElement('div', { className: 'detail-item' },
+            React.createElement('div', { className: 'dlabel' }, 'Story Points'),
+            React.createElement('div', { className: 'dvalue' }, t.story_points > 0 ? t.story_points : '\u2014')
+          ),
+          React.createElement('div', { className: 'detail-item' },
+            React.createElement('div', { className: 'dlabel' }, 'Age'),
+            React.createElement('div', { className: 'dvalue' }, daysAgoText(t.days_old))
+          ),
+          t.epic_key ? React.createElement('div', { className: 'detail-item' },
+            React.createElement('div', { className: 'dlabel' }, 'Epic'),
+            React.createElement('div', { className: 'dvalue' }, t.epic_key)
+          ) : null
+        )
+      )
+    );
+  }
+
+  // ── Team detail view ────────────────
+  if (selectedTeam) {
+    const team = selectedTeam;
+    const m = team.metrics;
+    const tickets = team.tickets || [];
+    const cats = ['Bugs & Incidents', 'Projects', 'Change', 'Tech Work'];
+
+    const filteredTickets = catFilter ? tickets.filter(t => t.category === catFilter) : tickets;
+    const sorted = [...filteredTickets].sort((a, b) => {
+      let av = a[sortCol], bv = b[sortCol];
+      if (av === null || av === undefined) av = sortDir > 0 ? Infinity : -Infinity;
+      if (bv === null || bv === undefined) bv = sortDir > 0 ? Infinity : -Infinity;
+      if (typeof av === 'string') av = av.toLowerCase();
+      if (typeof bv === 'string') bv = bv.toLowerCase();
+      if (av < bv) return -1 * sortDir;
+      if (av > bv) return 1 * sortDir;
+      return 0;
+    });
+
+    return React.createElement('div', { className: 'app' },
+      React.createElement('header', null,
+        React.createElement('h1', null, '\ud83d\udcca JIRA Backlog Health'),
+        React.createElement('div', { className: 'meta' }, 'Data loaded from CSV')
+      ),
+      React.createElement('div', { className: 'detail-panel' },
+        React.createElement('h2', null,
+          React.createElement('button', { className: 'back-btn', onClick: () => { setSelectedTeam(null); setCatFilter(''); } }, '\u2190 Back'),
+          team.team_name,
+          React.createElement('span', { style: { color: 'var(--text-muted)', fontSize: '14px', fontWeight: 400 } }, ' (' + team.project_key + ')')
+        ),
+        React.createElement('div', { style: { color: 'var(--text-muted)', fontSize: '13px', marginBottom: '16px' } }, team.product_group),
+
+        React.createElement('div', { className: 'detail-grid' },
+          React.createElement('div', { className: 'detail-item' },
+            React.createElement('div', { className: 'dlabel' }, 'Avg Quality'),
+            React.createElement('div', { className: 'dvalue', style: { color: scoreColor(m.avg_quality_score) } }, m.avg_quality_score + '%')
+          ),
+          React.createElement('div', { className: 'detail-item' },
+            React.createElement('div', { className: 'dlabel' }, 'Total Tickets'),
+            React.createElement('div', { className: 'dvalue' }, m.total_tickets)
+          ),
+          React.createElement('div', { className: 'detail-item' },
+            React.createElement('div', { className: 'dlabel' }, 'Sized'),
+            React.createElement('div', { className: 'dvalue' }, m.sized_tickets + ' / ' + m.total_tickets)
+          ),
+          React.createElement('div', { className: 'detail-item' },
+            React.createElement('div', { className: 'dlabel' }, 'Story Points (sized)'),
+            React.createElement('div', { className: 'dvalue' }, m.total_story_points)
+          ),
+          React.createElement('div', { className: 'detail-item' },
+            React.createElement('div', { className: 'dlabel' }, 'Avg Ticket Age'),
+            React.createElement('div', { className: 'dvalue' }, daysAgoText(m.avg_ticket_age_days))
+          ),
+          React.createElement('div', { className: 'detail-item' },
+            React.createElement('div', { className: 'dlabel' }, 'Oldest Ticket'),
+            React.createElement('div', { className: 'dvalue' }, daysAgoText(m.oldest_ticket_days))
+          ),
+          React.createElement('div', { className: 'detail-item' },
+            React.createElement('div', { className: 'dlabel' }, 'Quality Good / Fair / Poor'),
+            React.createElement('div', { className: 'dvalue' },
+              React.createElement('span', { style: { color: 'var(--green)' } }, m.quality_distribution.good),
+              ' / ',
+              React.createElement('span', { style: { color: 'var(--yellow)' } }, m.quality_distribution.fair),
+              ' / ',
+              React.createElement('span', { style: { color: 'var(--red)' } }, m.quality_distribution.poor)
+            )
+          )
+        ),
+
+        React.createElement('div', { className: 'section-title' }, 'Ticket Age Distribution'),
+        React.createElement(AgeHistogram, { tickets: tickets }),
+
+        React.createElement('div', { className: 'section-title' }, 'Category Breakdown'),
+        React.createElement('div', { className: 'cat-legend' },
+          cats.map(cat => {
+            const c = (m.categories || {})[cat] || { count: 0, story_points: 0 };
+            const isActive = catFilter === cat;
+            return React.createElement('div', {
+              key: cat,
+              className: 'cat-legend-item',
+              style: { cursor: 'pointer', opacity: catFilter && !isActive ? 0.4 : 1 },
+              onClick: () => setCatFilter(isActive ? '' : cat)
+            },
+              React.createElement('div', { className: 'cat-dot', style: { background: CAT_COLORS[cat] } }),
+              React.createElement('span', null, cat + ': '),
+              React.createElement('strong', { style: { color: 'var(--text)' } }, c.count),
+              React.createElement('span', { style: { marginLeft: '4px' } }, '(' + c.story_points + ' SP)')
+            );
+          })
+        ),
+        React.createElement(CategoryDonut, { categories: m.categories || {}, total: m.total_tickets, size: 120 }),
+
+        React.createElement('div', { className: 'section-title', style: { marginTop: '24px' } }, 'Tickets' + (catFilter ? ' \u2014 ' + catFilter : '')),
+        React.createElement('div', { style: { overflowX: 'auto' } },
+          React.createElement('table', null,
+            React.createElement('thead', null,
+              React.createElement('tr', null,
+                ['key', 'summary', 'type', 'category', 'status', 'priority', 'story_points', 'days_old', 'quality_score'].map(col =>
+                  React.createElement('th', { key: col, onClick: () => handleSort(col) },
+                    col.replace(/_/g, ' ') + (sortCol === col ? (sortDir > 0 ? ' \u25b2' : ' \u25bc') : '')
+                  )
+                )
+              )
+            ),
+            React.createElement('tbody', null,
+              sorted.map(t =>
+                React.createElement('tr', { key: t.key, style: { cursor: 'pointer' }, onClick: () => setSelectedTicket(t) },
+                  React.createElement('td', null, React.createElement('a', { href: t.url, target: '_blank', onClick: e => e.stopPropagation() }, t.key)),
+                  React.createElement('td', null, t.summary.length > 60 ? t.summary.substring(0, 60) + '...' : t.summary),
+                  React.createElement('td', null, t.type),
+                  React.createElement('td', null,
+                    React.createElement('span', { style: { color: CAT_COLORS[t.category] || 'var(--text)' } }, t.category)
+                  ),
+                  React.createElement('td', null, t.status),
+                  React.createElement('td', null, t.priority),
+                  React.createElement('td', { style: { textAlign: 'right' } }, t.story_points > 0 ? t.story_points : '\u2014'),
+                  React.createElement('td', { style: { textAlign: 'right' } }, daysAgoText(t.days_old)),
+                  React.createElement('td', null,
+                    React.createElement('span', { className: 'badge ' + scoreBadge(t.quality_score) }, t.quality_score + '%')
+                  )
+                )
+              )
+            )
+          )
+        )
+      )
+    );
+  }
+
+  // ── Main team overview ────────────────
+  return React.createElement('div', { className: 'app' },
+    React.createElement('header', null,
+      React.createElement('h1', null, '\ud83d\udcca JIRA Backlog Health Report'),
+      React.createElement('div', { className: 'meta' }, 'Data loaded from CSV')
+    ),
+
+    React.createElement('div', { className: 'stats-bar' },
+      React.createElement('div', { className: 'stat-card' },
+        React.createElement('div', { className: 'label' }, 'Teams'),
+        React.createElement('div', { className: 'value' }, totalTeams)
+      ),
+      React.createElement('div', { className: 'stat-card' },
+        React.createElement('div', { className: 'label' }, 'Total Backlog Tickets'),
+        React.createElement('div', { className: 'value' }, totalTickets)
+      ),
+      React.createElement('div', { className: 'stat-card' },
+        React.createElement('div', { className: 'label' }, 'Avg Quality Score'),
+        React.createElement('div', { className: 'value', style: { color: scoreColor(avgQuality) } }, avgQuality + '%')
+      ),
+      React.createElement('div', { className: 'stat-card' },
+        React.createElement('div', { className: 'label' }, 'Sized Tickets'),
+        React.createElement('div', { className: 'value' }, sizedPct + '%')
+      )
+    ),
+
+    React.createElement('div', { className: 'cat-legend', style: { marginBottom: '20px' } },
+      ['Bugs & Incidents', 'Projects', 'Change', 'Tech Work'].map(cat =>
+        React.createElement('div', { key: cat, className: 'cat-legend-item' },
+          React.createElement('div', { className: 'cat-dot', style: { background: CAT_COLORS[cat] } }),
+          React.createElement('span', null, cat)
+        )
+      )
+    ),
+
+    React.createElement('div', { className: 'controls' },
+      React.createElement('input', {
+        placeholder: 'Search teams, projects...',
+        value: search,
+        onChange: e => setSearch(e.target.value)
+      }),
+      React.createElement('select', { value: groupFilter, onChange: e => setGroupFilter(e.target.value) },
+        React.createElement('option', { value: '' }, 'All Product Groups'),
+        productGroups.map(g => React.createElement('option', { key: g, value: g }, g))
+      )
+    ),
+
+    filteredTeams.length === 0
+      ? React.createElement('div', { className: 'empty-state' }, 'No teams found matching your filters.')
+      : React.createElement('div', { className: 'team-grid' },
+          filteredTeams.map((team, i) => {
+            const m = team.metrics;
+            return React.createElement('div', {
+              key: i,
+              className: 'team-card',
+              onClick: () => { setSelectedTeam(team); setCatFilter(''); setSortCol('quality_score'); setSortDir(-1); }
+            },
+              React.createElement('div', { className: 'team-header' },
+                React.createElement('div', null,
+                  React.createElement('div', { className: 'team-name' }, team.team_name),
+                  React.createElement('div', { className: 'team-group' }, team.product_group + ' \u2022 ' + team.project_key)
+                ),
+                React.createElement('div', { className: 'team-score', style: { color: scoreColor(m.avg_quality_score) } },
+                  m.avg_quality_score + '%'
+                )
+              ),
+              React.createElement('div', { className: 'team-stats' },
+                React.createElement('div', { className: 'team-stat' }, React.createElement('strong', null, m.total_tickets), ' tickets'),
+                React.createElement('div', { className: 'team-stat' }, React.createElement('strong', null, m.sized_tickets), ' sized'),
+                React.createElement('div', { className: 'team-stat' }, React.createElement('strong', null, m.total_story_points), ' SP'),
+                React.createElement('div', { className: 'team-stat' }, 'avg age: ', React.createElement('strong', null, daysAgoText(m.avg_ticket_age_days))),
+                React.createElement('div', { className: 'team-stat' }, 'oldest: ', React.createElement('strong', null, daysAgoText(m.oldest_ticket_days)))
+              ),
+              React.createElement(CategoryDonut, { categories: m.categories || {}, total: m.total_tickets, size: 80 }),
+              React.createElement('div', { className: 'score-bar' },
+                React.createElement('div', { className: 'score-bar-fill', style: { width: m.avg_quality_score + '%', background: scoreColor(m.avg_quality_score) } })
+              )
+            );
+          })
+        )
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(App));
+</script>
+</body>
+</html>

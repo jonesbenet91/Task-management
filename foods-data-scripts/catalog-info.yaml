@@ -1,0 +1,8 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: foods-data-scripts
+  title: Foods Data Scripts
+  description: Generates an interactive dashboard with automated scripts maintained by the Food team
+  annotations:
+    github.com/project-slug: DigitalInnovation/foods-data-scripts
